@@ -1,0 +1,8 @@
+{
+  "name": "undangan-zultoni-beska",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "googleapis": "latest"
+  }
+}

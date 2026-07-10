@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Zultoni & Beska — Undangan Pernikahan</title>
+<meta name="description" content="Undangan pernikahan digital Zultoni & Beska — Garden Party, 19 Desember 2026">
+<link rel="icon" type="image/png" href="assets/logo-zb.png">
+<link rel="apple-touch-icon" href="assets/logo-zb.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --forest:#28331F;
+  --forest-deep:#10160D;
+  --forest-mid:#47573A;
+  --cream:#FAF3E5;
+  --cream-dim:#EEE1C6;
+  --gold:#C7A24E;
+  --gold-light:#EAD9A6;
+  --clay:#7A3A3E;
+  --sage:#B9928A;
+  --sage-light:#DEC3B8;
+  --ink:#241E19;
+  --white-soft:#FFFCF5;
+  --shadow:0 24px 60px rgba(20,26,14,0.28);
+  --shadow-soft:0 10px 30px rgba(20,26,14,0.14);
+  --serif:'Cormorant Garamond', serif;
+  --script:'Alex Brush', cursive;
+  --sans:'Jost', sans-serif;
+  --ease:cubic-bezier(.65,0,.35,1);
+}
+
+/* ============ RESET ============ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:var(--sans);
+  background:var(--cream);
+  color:var(--ink);
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;display:block;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+a{color:inherit;text-decoration:none;}
+ul{list-style:none;}
+button,a,input,textarea{-webkit-tap-highlight-color:transparent;}
+button,a{touch-action:manipulation;}
+::selection{background:var(--gold-light);color:var(--forest-deep);}
+
+body.invite-locked{overflow:hidden;height:100vh;height:100dvh;}
+
+/* ============ SHARED SECTION LAYOUT ============ */
+.section{position:relative;padding:5.5rem 1.5rem;overflow:hidden;}
+.section-inner{max-width:920px;margin:0 auto;position:relative;z-index:2;}
+.section--dark{background:var(--forest);color:var(--cream);}
+
+/* Sambungan lembut di batas terang <-> gelap, supaya scroll terasa satu alur
+   (bukan potongan slide) — warna section sebelumnya "meleleh" turun sedikit
+   ke section berikutnya lalu memudar. */
+/* Sambungan di batas terang <-> gelap: lengkung solid warna section sebelumnya,
+   BUKAN gradasi blend (blend lurus antar warna jauh beda hue jadi keruh/belang). */
+.section-seam{position:absolute;top:-1px;left:0;width:100%;height:58px;z-index:1;pointer-events:none;display:block;}
+.section-seam path{fill:var(--cream);}
+@media (max-width:600px){.section-seam{height:40px;}}
+.section--dark .section-label{color:var(--gold-light);}
+.section-label{
+  display:block;text-align:center;font-family:var(--sans);font-weight:500;
+  font-size:.72rem;letter-spacing:.32em;text-transform:uppercase;color:var(--clay);
+  margin-bottom:.6rem;
+}
+.section-title{
+  text-align:center;font-family:var(--serif);font-weight:500;
+  font-size:clamp(1.9rem,4.4vw,2.9rem);margin-bottom:1rem;
+}
+.section-sub{
+  text-align:center;max-width:520px;margin:0 auto 2.5rem;font-weight:300;
+  line-height:1.8;color:inherit;opacity:.85;font-size:1rem;
+}
+.divider{display:flex;align-items:center;justify-content:center;gap:10px;margin:1.4rem auto 2.4rem;}
+.divider::before,.divider::after{content:'';width:46px;height:1px;background:linear-gradient(90deg,transparent,var(--gold));}
+.divider::after{background:linear-gradient(90deg,var(--gold),transparent);}
+.divider i{
+  width:15px;height:15px;display:block;position:relative;background:var(--gold);
+  clip-path:path('M7.5 0C7.5 0 15 5 15 9.5C15 12.5 11.6 15 7.5 15C3.4 15 0 12.5 0 9.5C0 5 7.5 0 7.5 0Z');
+  transform:rotate(40deg);
+}
+.divider i::before,.divider i::after{content:'';position:absolute;top:6px;width:9px;height:1px;background:var(--gold);opacity:.75;}
+.divider i::before{right:100%;transform:rotate(24deg);}
+.divider i::after{left:100%;transform:rotate(-24deg);}
+
+/* Scroll reveal */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s var(--ease), transform .9s var(--ease);}
+.reveal.in-view{opacity:1;transform:translateY(0);}
+.reveal-d1{transition-delay:.08s;}
+.reveal-d2{transition-delay:.16s;}
+.reveal-d3{transition-delay:.24s;}
+
+/* ============ AMBIENT LAYERS (leaves across whole page) ============ */
+#leaves{position:fixed;inset:0;pointer-events:none;z-index:60;overflow:hidden;}
+.leaf{position:absolute;top:-8vh;width:16px;height:16px;opacity:0;animation:leafFall linear infinite;filter:drop-shadow(0 2px 3px rgba(0,0,0,.15));}
+.leaf svg{width:100%;height:100%;}
+.leaf-0 svg{fill:var(--sage);}
+.leaf-1 svg{fill:var(--gold);}
+.leaf-2 svg{fill:var(--clay);}
+.leaf.is-petal svg{fill:var(--sage-light);}
+.leaf.is-petal.leaf-1 svg{fill:var(--gold-light);}
+@keyframes leafFall{
+  0%{transform:translate(0,-10vh) rotate(0deg);opacity:0;}
+  8%{opacity:.85;}
+  50%{transform:translate(var(--sway,30px),52vh) rotate(180deg);}
+  92%{opacity:.7;}
+  100%{transform:translate(calc(var(--sway,30px) * -1),112vh) rotate(360deg);opacity:0;}
+}
+
+/* ============ GROWING VINE (kisah kami yang tumbuh, mengikuti progres scroll) ============ */
+#growVine{position:fixed;left:0;top:0;width:44px;height:100vh;z-index:12;pointer-events:none;opacity:.8;}
+#growVine svg{width:100%;height:100%;display:block;overflow:visible;}
+#vinePath{fill:none;stroke:var(--gold);stroke-width:2.4;stroke-linecap:round;}
+.vine-leaf{opacity:0;transform:scale(.25);transform-origin:0 0;transition:opacity .7s var(--ease), transform .7s var(--ease);}
+.vine-leaf path{fill:var(--sage);}
+.vine-leaf.is-grown{opacity:.92;transform:scale(1);}
+.vine-flower{opacity:0;transform:scale(.2) rotate(-25deg);transform-origin:0 0;transition:opacity .9s var(--ease), transform .9s var(--ease);}
+.vine-flower.is-grown{opacity:1;transform:scale(1) rotate(0deg);}
+.vine-flower circle{fill:var(--gold-light);}
+.vine-flower circle:first-child{fill:var(--clay);}
+@media (max-width:720px){#growVine{width:26px;opacity:.68;}}
+@media (max-width:420px){#growVine{width:20px;}}
+@media (prefers-reduced-motion: reduce){
+  .vine-leaf,.vine-flower{transition:none;}
+}
+
+/* ============ MUSIC TOGGLE ============ */
+.music-toggle{
+  position:fixed;left:18px;bottom:18px;z-index:80;
+  width:52px;height:52px;border-radius:50%;
+  background:var(--forest);color:var(--cream-dim);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow-soft);border:1px solid rgba(232,213,160,.3);
+}
+.music-toggle svg{width:20px;height:20px;}
+.music-toggle .ring{position:absolute;inset:-6px;border:1px solid var(--gold);border-radius:50%;opacity:0;}
+.music-toggle.is-playing .ring{animation:ringPulse 2.2s ease-out infinite;}
+@keyframes ringPulse{0%{opacity:.6;transform:scale(.9);}100%{opacity:0;transform:scale(1.3);}}
+
+/* ============ DOT NAV ============ */
+.dot-nav{position:fixed;right:16px;top:50%;transform:translateY(-50%);z-index:80;display:flex;flex-direction:column;gap:12px;}
+.dot-nav a{width:9px;height:9px;border-radius:50%;background:rgba(51,66,44,.25);border:1px solid var(--forest);display:block;transition:background .3s,transform .3s;}
+.dot-nav a.is-active{background:var(--gold);transform:scale(1.3);}
+@media (max-width:720px){.dot-nav{display:none;}}
+
+/* ============ LOADER ============ */
+#loader{position:fixed;inset:0;background:var(--forest-deep);z-index:200;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.8rem;transition:opacity .8s ease, visibility .8s;}
+#loader.is-done{opacity:0;visibility:hidden;pointer-events:none;}
+#loader .monogram{font-family:var(--script);font-size:2.4rem;color:var(--gold-light);}
+#loader .loader-logo{
+  width:104px;height:104px;border-radius:50%;object-fit:cover;
+  box-shadow:0 0 0 1px rgba(232,213,160,.4),0 20px 45px rgba(0,0,0,.45);
+  animation:loaderLogoPulse 2.4s ease-in-out infinite;
+}
+@keyframes loaderLogoPulse{
+  0%,100%{transform:scale(1);box-shadow:0 0 0 1px rgba(232,213,160,.4),0 20px 45px rgba(0,0,0,.45);}
+  50%{transform:scale(1.045);box-shadow:0 0 0 1px rgba(232,213,160,.7),0 20px 55px rgba(0,0,0,.5);}
+}
+#loader .bar{width:120px;height:2px;background:rgba(232,213,160,.2);overflow:hidden;border-radius:2px;}
+#loader .bar::after{content:'';display:block;width:40%;height:100%;background:var(--gold);animation:loaderMove 1.1s ease-in-out infinite;}
+@keyframes loaderMove{0%{transform:translateX(-100%);}100%{transform:translateX(350%);}}
+
+/* ============ COVER / GATE ============ */
+#cover{position:fixed;inset:0;z-index:100;overflow:hidden;transition:opacity .9s ease;}
+#cover.is-hidden{opacity:0;pointer-events:none;visibility:hidden;}
+
+.hero-scene{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,#F0CE8E 0%,#E39F5E 26%,#BD6650 48%,#7C4147 70%,var(--forest-deep) 100%);}
+.hero-sun{position:absolute;top:24%;left:50%;width:130px;height:130px;border-radius:50%;transform:translate(-50%,-50%);
+  background:radial-gradient(circle, #FFF3D6 0%, #F8D98B 45%, rgba(248,217,139,0) 72%);
+  box-shadow:0 0 90px 30px rgba(248,217,139,.35);animation:sunPulse 6s ease-in-out infinite;}
+@keyframes sunPulse{0%,100%{transform:translate(-50%,-50%) scale(1);}50%{transform:translate(-50%,-50%) scale(1.06);}}
+
+.bird{position:absolute;width:26px;opacity:.55;animation:birdFly linear infinite;}
+.bird svg{width:100%;fill:none;stroke:var(--forest-deep);stroke-width:2;stroke-linecap:round;}
+.bird--1{top:20%;animation-duration:22s;}
+.bird--2{top:28%;animation-duration:28s;animation-delay:-6s;}
+.bird--3{top:16%;animation-duration:25s;animation-delay:-14s;}
+@keyframes birdFly{0%{transform:translateX(-10vw) translateY(0);}50%{transform:translateX(55vw) translateY(-14px);}100%{transform:translateX(120vw) translateY(0);}}
+
+.butterfly{position:absolute;width:22px;opacity:.8;animation:butterflyFly linear infinite;filter:drop-shadow(0 2px 3px rgba(0,0,0,.18));}
+.butterfly svg{width:100%;display:block;animation:wingFlap .48s ease-in-out infinite alternate;transform-origin:50% 50%;}
+.butterfly--1{top:44%;color:var(--clay);animation-duration:17s;}
+.butterfly--2{top:60%;color:var(--gold);animation-duration:21s;animation-delay:-9s;}
+.butterfly--3{top:34%;color:var(--sage);animation-duration:24s;animation-delay:-4s;}
+@keyframes butterflyFly{
+  0%{transform:translateX(-10vw) translateY(0);}
+  22%{transform:translateX(28vw) translateY(-26px);}
+  46%{transform:translateX(52vw) translateY(8px);}
+  70%{transform:translateX(78vw) translateY(-18px);}
+  100%{transform:translateX(120vw) translateY(0);}
+}
+@keyframes wingFlap{0%{transform:scaleX(1);}100%{transform:scaleX(.68);}}
+
+.fireflies-layer{position:absolute;inset:0;z-index:2;pointer-events:none;}
+.firefly{position:absolute;width:5px;height:5px;border-radius:50%;background:var(--gold-light);
+  box-shadow:0 0 8px 3px rgba(232,213,160,.8);animation:fireflyFloat ease-in-out infinite;opacity:0;}
+@keyframes fireflyFloat{0%{transform:translate(0,0);opacity:.15;}25%{opacity:.95;}50%{transform:translate(24px,-34px);}75%{opacity:.35;}100%{transform:translate(-18px,12px);opacity:.15;}}
+
+.hill{position:absolute;left:0;bottom:0;width:100%;z-index:3;}
+.hill svg{width:100%;display:block;}
+.hill--back{bottom:6%;opacity:.9;}
+.hill--mid{bottom:2%;}
+.hill--front{bottom:-1%;}
+
+.grass{position:absolute;left:0;right:0;bottom:0;height:70px;z-index:5;display:flex;align-items:flex-end;justify-content:space-between;padding:0 2%;}
+.blade{width:5px;background:var(--forest-deep);border-radius:6px 6px 0 0;transform-origin:bottom center;animation:sway ease-in-out infinite alternate;}
+@keyframes sway{0%{transform:rotate(-4deg);}100%{transform:rotate(5deg);}}
+
+.gate{position:absolute;inset:0;z-index:6;display:flex;perspective:1800px;}
+.gate__door{
+  width:50%;height:100%;position:relative;
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,0) 0 10px, rgba(0,0,0,.08) 10px 12px),
+    linear-gradient(180deg,#5A4630,#3E3220 60%,#2B2318);
+  box-shadow:inset 0 0 40px rgba(0,0,0,.4);
+  transition:transform 1.15s var(--ease), opacity 1s ease .25s;
+}
+.gate__door--left{transform-origin:left center;border-right:2px solid rgba(232,213,160,.25);}
+.gate__door--right{transform-origin:right center;border-left:2px solid rgba(232,213,160,.25);}
+.gate__door::before{content:'';position:absolute;inset:14px;border:1px solid rgba(232,213,160,.22);}
+#gate.is-open .gate__door--left{transform:rotateY(-108deg);opacity:0;}
+#gate.is-open .gate__door--right{transform:rotateY(108deg);opacity:0;}
+
+.cover__content{
+  position:absolute;inset:0;z-index:8;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:2rem 1.5rem;color:var(--cream);
+  transition:opacity 1.1s ease, transform 1.2s var(--ease), filter 1.2s ease;
+}
+body.invite-open .cover__content{opacity:0;transform:translateY(-30px) scale(1.05);filter:blur(8px);pointer-events:none;}
+.cover__eyebrow{font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold-light);margin-bottom:.4rem;}
+.cover__guest{font-family:var(--serif);font-style:italic;font-size:1.3rem;margin-bottom:1.6rem;}
+.cover__monogram{font-family:var(--script);font-size:2.3rem;color:var(--gold-light);margin-bottom:.4rem;}
+.cover__title{font-family:var(--script);font-size:clamp(3rem,10vw,5.4rem);line-height:1;color:var(--white-soft);text-shadow:0 6px 30px rgba(0,0,0,.35);}
+.cover__title span{color:var(--gold-light);font-family:var(--serif);font-style:italic;font-size:.55em;vertical-align:middle;padding:0 .1em;}
+.cover__date{margin-top:.9rem;letter-spacing:.35em;font-size:.85rem;color:var(--gold-light);}
+.open-btn{
+  margin-top:2.4rem;padding:.95rem 2.6rem;border:1px solid var(--gold-light);border-radius:999px;
+  color:var(--cream);font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;
+  position:relative;overflow:hidden;transition:background .35s,color .35s;
+}
+.open-btn::before{content:'';position:absolute;inset:0;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .4s var(--ease);z-index:-1;}
+.open-btn:hover::before{transform:scaleX(1);}
+.open-btn:hover{color:var(--forest-deep);}
+.tap-hint{margin-top:.9rem;font-size:.72rem;letter-spacing:.08em;color:rgba(251,246,234,.65);animation:hintPulse 2.2s ease-in-out infinite;}
+@keyframes hintPulse{0%,100%{opacity:.5;}50%{opacity:1;}}
+
+/* ============ BRIDGE (transisi pelayaran, penghubung gerbang → undangan) ============ */
+.bridge-scene{
+  position:absolute;inset:0;z-index:9;overflow:hidden;
+  opacity:0;visibility:hidden;
+  background:linear-gradient(180deg,#333F28 0%,#1F281A 42%,var(--forest-deep) 100%);
+  transition:opacity 1.9s var(--ease),visibility 1.9s;
+}
+#cover.show-bridge .bridge-scene{opacity:1;visibility:visible;}
+#cover.show-bridge .hero-scene,
+#cover.show-bridge .gate{opacity:0;transition:opacity 1.9s var(--ease);pointer-events:none;}
+
+.bridge-moon{
+  position:absolute;top:15%;left:50%;width:64px;height:64px;border-radius:50%;
+  transform:translate(-50%,-50%) scale(1);
+  background:radial-gradient(circle,#FBF6EA 0%,var(--gold-light) 55%,rgba(232,213,160,0) 76%);
+  box-shadow:0 0 50px 16px rgba(232,213,160,.25);
+  z-index:4;
+  animation:moonBloom 2.8s ease-in forwards paused;
+  animation-delay:6.8s;
+}
+#cover.show-bridge .bridge-moon{animation-play-state:running;}
+@keyframes moonBloom{
+  0%{top:15%;transform:translate(-50%,-50%) scale(1);}
+  100%{top:46%;transform:translate(-50%,-50%) scale(26);}
+}
+.moon-glimmer{
+  position:absolute;top:15%;bottom:44%;left:50%;width:2px;transform:translateX(-50%);
+  background:linear-gradient(180deg,rgba(232,213,160,.45),rgba(232,213,160,0));filter:blur(1px);
+  animation:glimmerFade 1.1s ease-in forwards paused;
+  animation-delay:6.8s;
+}
+#cover.show-bridge .moon-glimmer{animation-play-state:running;}
+@keyframes glimmerFade{0%{opacity:1;}100%{opacity:0;}}
+.dusk-glow{
+  position:absolute;left:0;right:0;bottom:32%;height:30%;pointer-events:none;z-index:1;
+  background:linear-gradient(180deg, rgba(199,124,80,0) 0%, rgba(199,124,80,.4) 55%, rgba(122,58,62,.3) 100%);
+  filter:blur(8px);opacity:0;
+  animation:duskFade 4.6s ease-out forwards paused;
+}
+#cover.show-bridge .dusk-glow{animation-play-state:running;}
+@keyframes duskFade{
+  0%{opacity:.85;}
+  55%{opacity:.4;}
+  100%{opacity:0;}
+}
+.bridge-stars{position:absolute;inset:0;}
+.star{position:absolute;width:2px;height:2px;border-radius:50%;background:var(--cream);opacity:0;animation:starTwinkle ease-in-out infinite;}
+@keyframes starTwinkle{0%,100%{opacity:.12;}50%{opacity:.85;}}
+
+.bridge-sea{position:absolute;left:0;right:0;bottom:0;height:44%;}
+.wave{position:absolute;left:-12%;width:124%;}
+.wave svg{width:100%;display:block;}
+.wave--back{bottom:16%;opacity:.5;animation:waveDrift 10s linear infinite;}
+.wave--mid{bottom:6%;opacity:.75;animation:waveDrift 7.5s linear infinite reverse;}
+.wave--front{bottom:-2%;animation:waveDrift 5.8s linear infinite;}
+@keyframes waveDrift{0%{transform:translateX(0);}100%{transform:translateX(-4%);}}
+
+/* Kapal menyelesaikan pelayarannya secara utuh dari kiri ke kanan */
+.ship{
+  position:absolute;bottom:18%;left:-18%;width:clamp(110px,26vw,190px);z-index:2;
+  animation:shipSail 6.8s var(--ease) forwards paused;
+}
+#cover.show-bridge .ship{animation-play-state:running;}
+.ship svg{width:100%;overflow:visible;display:block;}
+.ship__hull{fill:var(--gold);stroke:var(--forest-deep);stroke-width:1;}
+.ship__mast{stroke:var(--gold);}
+.ship__wake{stroke:var(--cream);fill:none;}
+.ship__sail{fill:var(--cream);}
+.ship__sail--jib{fill:var(--cream-dim);}
+.ship__flag{fill:var(--clay);}
+@keyframes shipSail{
+  0%{left:-18%;transform:translateY(0) rotate(-1.6deg);}
+  18%{transform:translateY(-9px) rotate(1.2deg);}
+  36%{transform:translateY(-2px) rotate(-1deg);}
+  54%{transform:translateY(-10px) rotate(1.3deg);}
+  72%{transform:translateY(-3px) rotate(-1.1deg);}
+  88%{transform:translateY(-8px) rotate(1deg);}
+  100%{left:106%;transform:translateY(0) rotate(-1.6deg);}
+}
+
+.bridge-text{
+  position:absolute;left:0;right:0;bottom:10%;text-align:center;z-index:3;
+  opacity:0;transform:translateY(14px);transition:opacity 1.1s ease,transform 1.1s var(--ease);
+}
+#cover.show-bridge .bridge-text{opacity:1;transform:translateY(0);transition-delay:.7s;}
+.bridge-eyebrow{font-size:.7rem;letter-spacing:.32em;text-transform:uppercase;color:var(--gold-light);margin-bottom:.5rem;opacity:.9;}
+.bridge-line{font-family:var(--script);font-size:clamp(1.8rem,5vw,2.6rem);color:var(--white-soft);}
+.bridge-line--2{
+  margin-top:.7rem;font-family:var(--serif);font-style:italic;font-weight:500;
+  font-size:clamp(.95rem,2.4vw,1.2rem);color:var(--gold-light);letter-spacing:.02em;
+  opacity:0;transform:translateY(10px);transition:opacity 1.2s ease,transform 1.2s var(--ease);
+}
+#cover.show-bridge .bridge-line--2{opacity:.9;transform:translateY(0);transition-delay:3.5s;}
+
+/* Konten utama menyatu perlahan setelah kapal berlalu, bukan langsung muncul mendadak */
+#mainContent{opacity:0;transform:translateY(26px);transition:opacity 1.3s var(--ease),transform 1.3s var(--ease);}
+body.content-visible #mainContent{opacity:1;transform:translateY(0);}
+
+/* ============ QUOTE ============ */
+#quote{background:var(--cream-dim);}
+.quote-text{
+  font-family:var(--serif);font-style:italic;font-weight:500;text-align:center;
+  font-size:clamp(1.25rem,3vw,1.7rem);line-height:1.7;max-width:680px;margin:0 auto;color:var(--forest);
+}
+.quote-sign{text-align:center;margin-top:1.4rem;font-family:var(--script);font-size:1.6rem;color:var(--clay);}
+
+/* ============ COUPLE ============ */
+.couple-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:2rem;align-items:center;}
+@media (max-width:680px){.couple-grid{grid-template-columns:1fr;gap:2.6rem;}}
+.couple-card{text-align:center;}
+.couple-frame{
+  width:168px;height:168px;border-radius:50%;margin:0 auto 1.1rem;position:relative;
+  background:linear-gradient(160deg,var(--sage-light),var(--forest-mid));
+  display:flex;align-items:center;justify-content:center;color:var(--white-soft);
+  border:3px solid var(--gold);box-shadow:var(--shadow-soft);
+}
+.couple-frame svg{width:52px;height:52px;opacity:.85;}
+.couple-frame .ring{position:absolute;inset:-9px;border:1px dashed var(--gold);border-radius:50%;animation:spin 40s linear infinite;}
+.couple-frame::before,.couple-frame::after{
+  content:'';position:absolute;bottom:-8px;width:32px;height:42px;pointer-events:none;opacity:.9;z-index:2;
+  background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 34 44'%3E%3Cg fill='%23C7A24E'%3E%3Cellipse cx='11' cy='8' rx='6.4' ry='3.1' transform='rotate(-32 11 8)'/%3E%3Cellipse cx='8' cy='17' rx='6.8' ry='3.3' transform='rotate(-14 8 17)'/%3E%3Cellipse cx='9' cy='27' rx='6.8' ry='3.3' transform='rotate(8 9 27)'/%3E%3Cellipse cx='13' cy='36' rx='6.2' ry='3' transform='rotate(28 13 36)'/%3E%3C/g%3E%3C/svg%3E");
+}
+.couple-frame::before{left:-6px;}
+.couple-frame::after{right:-6px;transform:scaleX(-1);}
+@keyframes spin{to{transform:rotate(360deg);}}
+.couple-name{font-family:var(--script);font-size:2.1rem;color:var(--forest);margin-bottom:.3rem;}
+.couple-role{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--clay);margin-bottom:.5rem;}
+.couple-parents{font-size:.92rem;line-height:1.6;color:var(--ink);opacity:.8;max-width:220px;margin:0 auto;}
+.couple-and{font-family:var(--script);font-size:2.6rem;color:var(--gold);text-align:center;}
+
+/* ============ COUNTDOWN ============ */
+#countdown{background:var(--forest);color:var(--cream);position:relative;}
+.countdown{display:flex;justify-content:center;gap:.9rem;flex-wrap:wrap;position:relative;z-index:2;}
+.countdown__box{
+  background:rgba(251,246,234,.06);border:1px solid rgba(232,213,160,.35);border-radius:14px;
+  padding:1.1rem 0;width:84px;text-align:center;backdrop-filter:blur(2px);
+}
+.countdown__num{font-family:var(--serif);font-size:2rem;font-weight:600;color:var(--gold-light);line-height:1;}
+.countdown__unit{display:block;margin-top:.4rem;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;opacity:.75;}
+
+/* ============ EVENTS ============ */
+.event-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem;}
+@media (max-width:680px){.event-grid{grid-template-columns:1fr;}}
+.event-card{
+  background:var(--white-soft);border-radius:18px;padding:2.2rem 1.6rem;text-align:center;
+  box-shadow:var(--shadow-soft);border:1px solid rgba(189,155,74,.25);position:relative;
+}
+.event-card::before,.event-card::after,
+.gift-card::before,.gift-card::after{
+  content:'';position:absolute;width:24px;height:24px;opacity:.4;pointer-events:none;
+  background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23C7A24E' d='M12 2C7 6 4 10 4 14a8 8 0 0 0 16 0c0-4-3-8-8-12Z'/%3E%3C/svg%3E");
+}
+.event-card::before,.gift-card::before{top:10px;left:10px;transform:rotate(-20deg);}
+.event-card::after,.gift-card::after{bottom:10px;right:10px;transform:rotate(160deg);}
+.event-card svg{width:38px;height:38px;color:var(--clay);margin:0 auto 1rem;}
+.event-card h3{font-family:var(--serif);font-size:1.5rem;color:var(--forest);margin-bottom:.5rem;}
+.event-card .event-date{font-weight:500;margin-bottom:.15rem;}
+.event-card .event-time{color:var(--clay);font-size:.92rem;margin-bottom:.9rem;}
+.event-card .event-venue{font-size:.9rem;line-height:1.6;opacity:.8;margin-bottom:1.3rem;}
+.map-btn{
+  display:inline-flex;align-items:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:999px;
+  background:var(--forest);color:var(--cream);font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;
+  transition:transform .25s;
+}
+.map-btn:hover{transform:translateY(-2px);}
+
+/* ============ GALLERY ============ */
+.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;}
+.gallery__item{
+  aspect-ratio:1;border-radius:14px;position:relative;overflow:hidden;
+  background:linear-gradient(155deg,var(--sage-light),var(--forest-mid));
+  display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-soft);
+}
+.gallery__item svg{width:34px;height:34px;color:rgba(255,255,255,.85);}
+.gallery__item::after{
+  content:attr(data-label);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  text-align:center;padding:1rem;background:rgba(27,36,22,.72);color:var(--cream);font-size:.82rem;
+  opacity:0;transition:opacity .35s;
+}
+.gallery__item:hover::after{opacity:1;}
+.gallery__item:hover{transform:scale(1.02);}
+.gallery__item{transition:transform .35s var(--ease);}
+
+/* ============ GIFT ============ */
+.gift-toggle{
+  display:block;margin:0 auto;padding:.9rem 2.2rem;border-radius:999px;border:1px solid var(--gold);
+  color:var(--forest);font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;background:var(--white-soft);
+  box-shadow:var(--shadow-soft);transition:background .3s,color .3s;
+}
+.gift-toggle:hover{background:var(--forest);color:var(--cream);}
+.gift-panel{max-height:0;overflow:hidden;transition:max-height .6s var(--ease);}
+.gift-panel.is-open{max-height:600px;}
+.gift-cards{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:2rem;}
+@media (max-width:680px){.gift-cards{grid-template-columns:1fr;}}
+.gift-card{position:relative;background:var(--white-soft);border-radius:16px;padding:1.6rem;text-align:center;box-shadow:var(--shadow-soft);border:1px solid rgba(189,155,74,.25);}
+.gift-card h4{font-family:var(--serif);font-size:1.2rem;color:var(--forest);margin-bottom:.3rem;}
+.gift-card .acc-name{font-size:.85rem;opacity:.7;margin-bottom:.2rem;}
+.gift-card .acc-number{font-family:var(--serif);font-size:1.3rem;letter-spacing:.06em;margin-bottom:1rem;}
+.copy-btn{padding:.5rem 1.2rem;border-radius:999px;background:var(--forest);color:var(--cream);font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;}
+
+/* ============ RSVP ============ */
+#rsvp{background:var(--cream-dim);}
+.rsvp-form{max-width:560px;margin:0 auto 3rem;display:grid;gap:1rem;}
+.field label{display:block;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--forest);margin-bottom:.35rem;}
+.field input[type=text],.field textarea{
+  width:100%;padding:.8rem 1rem;border:1px solid rgba(51,66,44,.28);border-radius:10px;background:var(--white-soft);
+  font-family:var(--sans);font-size:16px;color:var(--ink);resize:vertical;
+}
+.field input:focus,.field textarea:focus{outline:2px solid var(--gold);outline-offset:1px;}
+.radio-row{display:flex;gap:1.4rem;flex-wrap:wrap;}
+.radio-row label{display:flex;align-items:center;gap:.4rem;font-size:.9rem;text-transform:none;letter-spacing:0;color:var(--ink);}
+.submit-btn{
+  justify-self:center;margin-top:.4rem;padding:.9rem 2.6rem;border-radius:999px;background:var(--forest);
+  color:var(--cream);letter-spacing:.1em;text-transform:uppercase;font-size:.85rem;box-shadow:var(--shadow-soft);
+  transition:transform .25s;
+}
+.submit-btn:hover{transform:translateY(-2px);}
+#wishList{max-width:100%;margin:0 auto;}
+.wishes-empty{text-align:center;opacity:.6;font-size:.9rem;padding:1rem 0;}
+
+/* Floating wishes wall — ucapan yang sudah masuk melayang & bergeser pelan seperti daun di taman */
+.wishes-marquee{
+  position:relative;overflow:hidden;padding:.4rem 0;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);
+}
+.wish-track{display:flex;gap:1.1rem;width:max-content;will-change:transform;}
+.wish-track+.wish-track{margin-top:1.1rem;}
+.wish-track.is-anim-a{animation:marqueeLeft var(--dur,42s) linear infinite;}
+.wish-track.is-anim-b{animation:marqueeRight var(--dur,48s) linear infinite;}
+.wishes-marquee:hover .wish-track,.wishes-marquee:focus-within .wish-track{animation-play-state:paused;}
+@keyframes marqueeLeft{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+@keyframes marqueeRight{from{transform:translateX(-50%);}to{transform:translateX(0);}}
+
+.wish-card{
+  flex:0 0 auto;width:260px;background:var(--white-soft);border-radius:14px;padding:1.1rem 1.3rem;
+  box-shadow:var(--shadow-soft);border-left:3px solid var(--gold);
+  animation:cardFloat ease-in-out infinite;animation-duration:var(--float-dur,5s);
+}
+@keyframes cardFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+.wish-head{display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;margin-bottom:.35rem;flex-wrap:wrap;}
+.wish-head strong{color:var(--forest);font-family:var(--serif);font-size:1.05rem;display:inline-flex;align-items:center;gap:.3rem;}
+.wish-head strong svg{width:11px;height:11px;color:var(--gold);flex-shrink:0;}
+.wish-status{font-size:.65rem;letter-spacing:.06em;text-transform:uppercase;color:var(--clay);white-space:nowrap;}
+.wish-card p{
+  font-size:.88rem;line-height:1.55;opacity:.85;
+  display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;
+}
+@media (max-width:680px){
+  .wish-card{width:216px;padding:1rem 1.1rem;}
+  .wish-track+.wish-track{margin-top:.85rem;}
+}
+
+/* Petal burst saat ucapan berhasil dikirim */
+.petal-burst{position:fixed;width:9px;height:9px;border-radius:60% 0 60% 0;pointer-events:none;z-index:150;animation:petalBurstMove .95s ease-out forwards;}
+@keyframes petalBurstMove{
+  0%{transform:translate(0,0) rotate(0deg) scale(1);opacity:1;}
+  100%{transform:translate(var(--tx),var(--ty)) rotate(var(--rot)) scale(.35);opacity:0;}
+}
+
+/* ============ CLOSING ============ */
+#closing{background:var(--forest-deep);color:var(--cream);text-align:center;padding-bottom:6rem;}
+.closing-leaf{width:34px;height:34px;margin:0 auto 1.2rem;color:var(--gold);}
+.closing-logo{
+  width:88px;height:88px;border-radius:50%;object-fit:cover;margin:0 auto 1.4rem;display:block;
+  box-shadow:0 0 0 1px rgba(232,213,160,.45),var(--shadow);
+}
+.closing-text{max-width:480px;margin:0 auto 1.6rem;line-height:1.9;opacity:.85;font-weight:300;}
+.closing-names{font-family:var(--script);font-size:clamp(2.4rem,7vw,3.6rem);color:var(--gold-light);}
+.closing-date{letter-spacing:.3em;font-size:.8rem;margin-top:.5rem;opacity:.75;}
+.closing-credit{margin-top:3rem;font-size:.7rem;opacity:.45;letter-spacing:.04em;}
+
+/* ============ MOBILE TUNING ============ */
+@media (max-width:600px){
+  .section{padding:3.6rem 1.25rem;}
+  .section-title{margin-bottom:.8rem;}
+  .section-sub{margin-bottom:2rem;}
+
+  .countdown{gap:.55rem;}
+  .countdown__box{width:72px;padding:.85rem 0;}
+  .countdown__num{font-size:1.7rem;}
+  .countdown__unit{font-size:.58rem;letter-spacing:.12em;}
+
+  .event-card{padding:1.8rem 1.3rem;}
+  .couple-frame{width:144px;height:144px;}
+
+  .music-toggle{
+    left:calc(14px + env(safe-area-inset-left));
+    bottom:calc(14px + env(safe-area-inset-bottom));
+    width:46px;height:46px;
+  }
+  .music-toggle svg{width:18px;height:18px;}
+}
+@media (max-width:360px){
+  .countdown{gap:.4rem;}
+  .countdown__box{width:64px;padding:.75rem 0;}
+  .countdown__num{font-size:1.45rem;}
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}
+}
+</style>
+</head>
+<body class="invite-locked">
+
+<!-- ================= LOADER ================= -->
+<div id="loader"><img src="assets/logo-zb-emblem.png" alt="Zultoni &amp; Beska" class="loader-logo"><div class="bar"></div></div>
+
+<!-- ================= AMBIENT LEAVES (whole page) ================= -->
+<div id="leaves" aria-hidden="true"></div>
+
+<!-- ================= GROWING VINE (tumbuh mengikuti progres baca) ================= -->
+<div id="growVine" aria-hidden="true">
+  <svg viewBox="0 0 40 1000" preserveAspectRatio="none">
+    <path id="vinePath" d="M20,0 C34,60 6,120 20,180 C34,240 6,300 20,360 C34,420 6,480 20,540 C34,600 6,660 20,720 C34,780 6,840 20,900 C30,940 14,970 20,1000"/>
+
+    <g transform="translate(15,150) rotate(-25)"><g class="vine-leaf" data-threshold="0.10"><path d="M0 0C6 -3 13 0 15 6C13 10 6 12 0 10C-2 6 -2 3 0 0Z"/></g></g>
+    <g transform="translate(27,235) rotate(20)"><g class="vine-leaf" data-threshold="0.20"><path d="M0 0C6 -3 13 0 15 6C13 10 6 12 0 10C-2 6 -2 3 0 0Z"/></g></g>
+    <g transform="translate(13,335) rotate(-18)"><g class="vine-leaf" data-threshold="0.32"><path d="M0 0C6 -3 13 0 15 6C13 10 6 12 0 10C-2 6 -2 3 0 0Z"/></g></g>
+    <g transform="translate(28,430) rotate(24)"><g class="vine-leaf" data-threshold="0.42"><path d="M0 0C6 -3 13 0 15 6C13 10 6 12 0 10C-2 6 -2 3 0 0Z"/></g></g>
+    <g transform="translate(13,515) rotate(-22)"><g class="vine-leaf" data-threshold="0.52"><path d="M0 0C6 -3 13 0 15 6C13 10 6 12 0 10C-2 6 -2 3 0 0Z"/></g></g>
+    <g transform="translate(28,610) rotate(18)"><g class="vine-leaf" data-threshold="0.62"><path d="M0 0C6 -3 13 0 15 6C13 10 6 12 0 10C-2 6 -2 3 0 0Z"/></g></g>
+    <g transform="translate(13,695) rotate(-20)"><g class="vine-leaf" data-threshold="0.72"><path d="M0 0C6 -3 13 0 15 6C13 10 6 12 0 10C-2 6 -2 3 0 0Z"/></g></g>
+    <g transform="translate(27,790) rotate(22)"><g class="vine-leaf" data-threshold="0.82"><path d="M0 0C6 -3 13 0 15 6C13 10 6 12 0 10C-2 6 -2 3 0 0Z"/></g></g>
+
+    <g transform="translate(20,960)">
+      <g class="vine-flower" data-threshold="0.94">
+        <circle r="3" cy="0" cx="0"/>
+        <circle r="3" cy="-6" cx="0" transform="rotate(72)"/>
+        <circle r="3" cy="-6" cx="0" transform="rotate(144)"/>
+        <circle r="3" cy="-6" cx="0" transform="rotate(216)"/>
+        <circle r="3" cy="-6" cx="0" transform="rotate(288)"/>
+      </g>
+    </g>
+  </svg>
+</div>
+
+<!-- ================= MUSIC TOGGLE ================= -->
+<!-- GANTI src audio di bawah (elemen #bgAudio) dengan file musik pilihan kalian -->
+<button id="musicToggle" class="music-toggle" aria-label="Putar/berhenti musik">
+  <span class="ring"></span>
+  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+</button>
+<audio id="bgAudio" loop preload="none">
+  <source src="assets/bg-music.mp3" type="audio/mpeg">
+</audio>
+
+<!-- ================= DOT NAV ================= -->
+<nav class="dot-nav" aria-label="Navigasi bagian">
+  <a href="#quote" aria-label="Kutipan"></a>
+  <a href="#couple" aria-label="Mempelai"></a>
+  <a href="#countdown" aria-label="Hitung mundur"></a>
+  <a href="#events" aria-label="Acara"></a>
+  <a href="#gallery" aria-label="Galeri"></a>
+  <a href="#gift" aria-label="Amplop digital"></a>
+  <a href="#rsvp" aria-label="RSVP"></a>
+</nav>
+
+<!-- ================= COVER / GARDEN GATE ================= -->
+<section id="cover">
+  <div class="hero-scene">
+    <div class="hero-sun"></div>
+    <div class="bird bird--1"><svg viewBox="0 0 24 12"><path d="M0 8 Q6 0 12 8 Q18 0 24 8"/></svg></div>
+    <div class="bird bird--2"><svg viewBox="0 0 24 12"><path d="M0 8 Q6 0 12 8 Q18 0 24 8"/></svg></div>
+    <div class="bird bird--3"><svg viewBox="0 0 24 12"><path d="M0 8 Q6 0 12 8 Q18 0 24 8"/></svg></div>
+    <div class="butterfly butterfly--1"><svg viewBox="0 0 24 20" fill="currentColor"><path d="M12 10C9 2 2 2 2 8C2 13 8 12 12 10C16 12 22 13 22 8C22 2 15 2 12 10Z"/></svg></div>
+    <div class="butterfly butterfly--2"><svg viewBox="0 0 24 20" fill="currentColor"><path d="M12 10C9 2 2 2 2 8C2 13 8 12 12 10C16 12 22 13 22 8C22 2 15 2 12 10Z"/></svg></div>
+    <div class="butterfly butterfly--3"><svg viewBox="0 0 24 20" fill="currentColor"><path d="M12 10C9 2 2 2 2 8C2 13 8 12 12 10C16 12 22 13 22 8C22 2 15 2 12 10Z"/></svg></div>
+    <div class="fireflies-layer" id="fireflies"></div>
+    <div class="hill hill--back"><svg viewBox="0 0 500 100" preserveAspectRatio="none"><path d="M0,60 Q125,10 250,55 T500,50 V100 H0 Z" fill="#47573A"/></svg></div>
+    <div class="hill hill--mid"><svg viewBox="0 0 500 100" preserveAspectRatio="none"><path d="M0,70 Q150,25 300,65 T500,60 V100 H0 Z" fill="#28331F"/></svg></div>
+    <div class="hill hill--front"><svg viewBox="0 0 500 100" preserveAspectRatio="none"><path d="M0,80 Q170,45 320,78 T500,72 V100 H0 Z" fill="#10160D"/></svg></div>
+    <div class="grass" id="grass"></div>
+  </div>
+
+  <div class="gate" id="gate">
+    <div class="gate__door gate__door--left"></div>
+    <div class="gate__door gate__door--right"></div>
+  </div>
+
+  <div class="cover__content">
+    <p class="cover__eyebrow">Kepada Yth.</p>
+    <p class="cover__guest" id="guestName">Tamu Undangan</p>
+    <div class="cover__monogram">❦</div>
+    <h1 class="cover__title">Zultoni <span>&amp;</span> Beska</h1>
+    <p class="cover__date">19 . 12 . 2026</p>
+    <button id="openInvite" class="open-btn"><span>Buka Undangan</span></button>
+    <p class="tap-hint">Ketuk untuk membuka gerbang taman</p>
+  </div>
+
+  <!-- ============ BRIDGE: pelayaran singkat penghubung gerbang → undangan ============ -->
+  <div class="bridge-scene" aria-hidden="true">
+    <div class="bridge-moon"></div>
+    <div class="moon-glimmer"></div>
+    <div class="bridge-stars" id="bridgeStars"></div>
+    <div class="dusk-glow"></div>
+
+    <div class="bridge-sea">
+      <div class="wave wave--back"><svg viewBox="0 0 500 60" preserveAspectRatio="none"><path d="M0,30 Q60,10 125,28 T250,26 T375,30 T500,24 V60 H0 Z" fill="#242E1C"/></svg></div>
+      <div class="wave wave--mid"><svg viewBox="0 0 500 60" preserveAspectRatio="none"><path d="M0,34 Q70,16 140,32 T280,30 T420,34 T500,28 V60 H0 Z" fill="#181F12"/></svg></div>
+      <div class="wave wave--front"><svg viewBox="0 0 500 60" preserveAspectRatio="none"><path d="M0,40 Q80,22 150,38 T300,36 T450,40 T500,34 V60 H0 Z" fill="#0F140B"/></svg></div>
+    </div>
+
+    <div class="ship">
+      <svg viewBox="0 0 240 170">
+        <path class="ship__wake" d="M14,132 Q-16,126 -40,133" stroke-width="2" opacity=".4"/>
+        <path class="ship__wake" d="M6,143 Q-22,140 -48,147" stroke-width="2" opacity=".22"/>
+        <path class="ship__hull" d="M18,120 C55,146 185,146 222,120 L206,133 C168,151 72,151 34,133 Z"/>
+        <line class="ship__mast" x1="120" y1="120" x2="120" y2="16" stroke-width="2.4"/>
+        <path class="ship__flag" d="M120,16 L140,22 L120,28 Z"/>
+        <path class="ship__sail" d="M120,20 C160,42 163,88 120,116 Z"/>
+        <path class="ship__sail--jib" d="M120,54 L206,96 L120,110 Z"/>
+      </svg>
+    </div>
+
+    <div class="bridge-text">
+      <p class="bridge-eyebrow">Menuju Babak Baru</p>
+      <p class="bridge-line">Dua Hati, Satu Haluan</p>
+      <p class="bridge-line--2">Berlayar bersama, menuju cahaya senja yang abadi</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MAIN CONTENT ================= -->
+<div id="mainContent">
+
+  <!-- QUOTE -->
+  <section id="quote" class="section">
+    <div class="section-inner">
+      <p class="quote-text reveal">
+        “Seperti dua pohon yang tumbuh berdampingan, akar kami saling menguat, dahan kami saling menaungi —
+        dan di bawah langit yang sama, kami memilih untuk terus tumbuh bersama, selamanya.”
+      </p>
+      <p class="quote-sign reveal reveal-d1">Zultoni &amp; Beska</p>
+    </div>
+  </section>
+
+  <!-- COUPLE -->
+  <section id="couple" class="section">
+    <div class="section-inner">
+      <span class="section-label reveal">Mempelai</span>
+      <h2 class="section-title reveal">Dengan Penuh Syukur</h2>
+
+      <div class="couple-grid">
+        <div class="couple-card reveal">
+          <div class="couple-frame"><span class="ring"></span>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.4 0-8 2.2-8 5v2h16v-2c0-2.8-3.6-5-8-5Z"/></svg>
+          </div>
+          <p class="couple-name">Zultoni</p>
+          <p class="couple-role">Mempelai Pria</p>
+          <!-- GANTI dengan nama orang tua asli -->
+          <p class="couple-parents">Putra dari Bapak Ahmad Supriyadi &amp; Ibu Siti Aminah</p>
+        </div>
+
+        <div class="couple-and reveal reveal-d1">&amp;</div>
+
+        <div class="couple-card reveal reveal-d2">
+          <div class="couple-frame"><span class="ring"></span>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.4 0-8 2.2-8 5v2h16v-2c0-2.8-3.6-5-8-5Z"/></svg>
+          </div>
+          <p class="couple-name">Beska</p>
+          <p class="couple-role">Mempelai Wanita</p>
+          <!-- GANTI dengan nama orang tua asli -->
+          <p class="couple-parents">Putri dari Bapak Hendra Wijaya &amp; Ibu Ratna Sari</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COUNTDOWN -->
+  <section id="countdown" class="section">
+    <svg class="section-seam" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true"><path d="M0,0 L1440,0 L1440,32 C1080,78 360,78 0,32 Z" style="fill:var(--cream)"/></svg>
+    <div class="section-inner">
+      <span class="section-label reveal">Menghitung Hari</span>
+      <h2 class="section-title reveal">Menuju Hari Bahagia Kami</h2>
+      <div class="divider reveal"><i></i></div>
+      <div class="countdown reveal">
+        <div class="countdown__box"><span class="countdown__num" id="cd-days">00</span><span class="countdown__unit">Hari</span></div>
+        <div class="countdown__box"><span class="countdown__num" id="cd-hours">00</span><span class="countdown__unit">Jam</span></div>
+        <div class="countdown__box"><span class="countdown__num" id="cd-min">00</span><span class="countdown__unit">Menit</span></div>
+        <div class="countdown__box"><span class="countdown__num" id="cd-sec">00</span><span class="countdown__unit">Detik</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EVENTS -->
+  <!-- GANTI tanggal, jam, dan lokasi acara sesuai rencana kalian -->
+  <section id="events" class="section">
+    <svg class="section-seam" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true"><path d="M0,0 L1440,0 L1440,32 C1080,78 360,78 0,32 Z" style="fill:var(--forest)"/></svg>
+    <div class="section-inner">
+      <span class="section-label reveal">Rangkaian Acara</span>
+      <h2 class="section-title reveal">Garden Party Pernikahan</h2>
+      <div class="divider reveal"><i></i></div>
+
+      <div class="event-grid">
+        <div class="event-card reveal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3v4M12 21c4-2 7-6 7-10a7 7 0 1 0-14 0c0 4 3 8 7 10Z"/><circle cx="12" cy="11" r="2.4"/></svg>
+          <h3>Akad Nikah</h3>
+          <p class="event-date">Sabtu, 19 Desember 2026</p>
+          <p class="event-time">08.00 — 10.00 WIB</p>
+          <p class="event-venue">Taman Bunga Alamanda<br>Jl. Raya Sentul No. 88, Sentul, Bogor</p>
+          <a class="map-btn" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Taman+Bunga+Alamanda+Sentul+Bogor">Lihat Lokasi</a>
+        </div>
+
+        <div class="event-card reveal reveal-d1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 20h16M6 20V9l6-5 6 5v11M10 20v-6h4v6"/></svg>
+          <h3>Resepsi</h3>
+          <p class="event-date">Sabtu, 19 Desember 2026</p>
+          <p class="event-time">16.00 — 22.00 WIB (Golden Hour hingga Malam)</p>
+          <p class="event-venue">Taman Bunga Alamanda (Outdoor Garden)<br>Jl. Raya Sentul No. 88, Sentul, Bogor</p>
+          <a class="map-btn" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=Taman+Bunga+Alamanda+Sentul+Bogor">Lihat Lokasi</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GALLERY -->
+  <!-- GANTI setiap .gallery__item dengan <img src="foto-kalian.jpg" alt="..."> -->
+  <section id="gallery" class="section" style="background:var(--cream-dim)">
+    <div class="section-inner">
+      <span class="section-label reveal">Galeri</span>
+      <h2 class="section-title reveal">Momen Berharga</h2>
+      <div class="divider reveal"><i></i></div>
+      <div class="gallery">
+        <div class="gallery__item reveal" data-label="Ganti dengan foto favorit kalian"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 5h16v14H4V5Zm2 12 4-5 3 3 4-6 3 8H6Z"/></svg></div>
+        <div class="gallery__item reveal reveal-d1" data-label="Prewedding di kebun"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 5h16v14H4V5Zm2 12 4-5 3 3 4-6 3 8H6Z"/></svg></div>
+        <div class="gallery__item reveal reveal-d2" data-label="Momen lamaran"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 5h16v14H4V5Zm2 12 4-5 3 3 4-6 3 8H6Z"/></svg></div>
+        <div class="gallery__item reveal" data-label="Bersama keluarga"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 5h16v14H4V5Zm2 12 4-5 3 3 4-6 3 8H6Z"/></svg></div>
+        <div class="gallery__item reveal reveal-d1" data-label="Golden hour favorit"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 5h16v14H4V5Zm2 12 4-5 3 3 4-6 3 8H6Z"/></svg></div>
+        <div class="gallery__item reveal reveal-d2" data-label="Tawa kami berdua"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 5h16v14H4V5Zm2 12 4-5 3 3 4-6 3 8H6Z"/></svg></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GIFT -->
+  <!-- GANTI nomor rekening & e-wallet dengan data asli kalian -->
+  <section id="gift" class="section" style="background:var(--cream-dim)">
+    <div class="section-inner" style="text-align:center">
+      <span class="section-label reveal">Tanda Kasih</span>
+      <h2 class="section-title reveal">Amplop Digital</h2>
+      <p class="section-sub reveal">Doa restu Anda adalah karunia yang paling berarti bagi kami. Namun jika ingin memberi tanda kasih, kami menyediakan amplop digital berikut.</p>
+      <button class="gift-toggle reveal" id="giftToggle">Buka Amplop Digital</button>
+      <div class="gift-panel" id="giftPanel">
+        <div class="gift-cards">
+          <div class="gift-card">
+            <h4>Bank BCA</h4>
+            <p class="acc-name">a.n. Zultoni</p>
+            <p class="acc-number">1234 5678 90</p>
+            <button class="copy-btn" data-copy="1234567890">Salin Nomor</button>
+          </div>
+          <div class="gift-card">
+            <h4>GoPay / OVO</h4>
+            <p class="acc-name">a.n. Beska</p>
+            <p class="acc-number">0812-3456-7890</p>
+            <button class="copy-btn" data-copy="081234567890">Salin Nomor</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RSVP -->
+  <section id="rsvp" class="section">
+    <div class="section-inner">
+      <span class="section-label reveal">Konfirmasi Kehadiran</span>
+      <h2 class="section-title reveal">RSVP &amp; Ucapan</h2>
+      <div class="divider reveal"><i></i></div>
+
+      <form class="rsvp-form reveal" id="wishForm">
+        <div class="field">
+          <label for="wishName">Nama</label>
+          <input type="text" id="wishName" placeholder="Nama Anda" required>
+        </div>
+        <div class="field">
+          <label>Konfirmasi Kehadiran</label>
+          <div class="radio-row">
+            <label><input type="radio" name="attend" value="hadir" checked> Insya Allah Hadir</label>
+            <label><input type="radio" name="attend" value="tidak"> Belum Bisa Hadir</label>
+            <label><input type="radio" name="attend" value="ragu"> Masih Ragu</label>
+          </div>
+        </div>
+        <div class="field">
+          <label for="wishMessage">Ucapan &amp; Doa</label>
+          <textarea id="wishMessage" rows="3" placeholder="Tulis ucapan dan doa terbaik untuk kami..." required></textarea>
+        </div>
+        <button type="submit" class="submit-btn">Kirim</button>
+      </form>
+
+      <div id="wishList"></div>
+    </div>
+  </section>
+
+  <!-- CLOSING -->
+  <section id="closing" class="section">
+    <svg class="section-seam" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true"><path d="M0,0 L1440,0 L1440,32 C1080,78 360,78 0,32 Z" style="fill:var(--cream-dim)"/></svg>
+    <div class="section-inner">
+      <img src="assets/logo-zb.png" alt="Zultoni &amp; Beska" class="closing-logo reveal">
+      <svg class="closing-leaf reveal" viewBox="0 0 32 32" fill="currentColor"><path d="M16 2C7 9 3 19 16 30C29 19 25 9 16 2Z"/></svg>
+      <p class="closing-text reveal">Terima kasih telah menjadi bagian dari kisah kami. Kehadiran dan doa restu Anda adalah hadiah paling berarti dalam perjalanan kami memulai babak baru ini.</p>
+      <p class="closing-names reveal reveal-d1">Zultoni &amp; Beska</p>
+      <p class="closing-date reveal reveal-d2">19 DESEMBER 2026</p>
+      <p class="closing-credit">Undangan digital ini dibuat dengan penuh cinta 🌿</p>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(() => {
+  /* ---------- Guest name from URL (?to=Nama) ---------- */
+  const params = new URLSearchParams(window.location.search);
+  const rawGuest = params.get('to');
+  let guestName = 'Tamu Undangan';
+  if (rawGuest) {
+    guestName = decodeURIComponent(rawGuest.replace(/\+/g,' ')).replace(/\s+/g,' ').trim();
+    /* Rapikan kapital tiap kata, jaga-jaga kalau link diketik huruf kecil semua */
+    if (guestName) {
+      guestName = guestName.split(' ').map(w => w ? w.charAt(0).toUpperCase()+w.slice(1) : w).join(' ');
+    } else {
+      guestName = 'Tamu Undangan';
+    }
+  }
+  const guestEl = document.getElementById('guestName');
+  if (guestEl) guestEl.textContent = guestName;
+
+  /* Judul tab browser ikut personal saat dibuka lewat link bernama */
+  if (guestName !== 'Tamu Undangan') {
+    document.title = 'Undangan untuk ' + guestName + ' — Zultoni & Beska';
+  }
+
+  /* Prefill nama di form ucapan/RSVP supaya tamu tak perlu ketik ulang namanya */
+  const wishNameInput = document.getElementById('wishName');
+  if (wishNameInput && guestName !== 'Tamu Undangan') {
+    wishNameInput.value = guestName;
+  }
+
+  /* ---------- Countdown ---------- */
+  /* GANTI tanggal target di bawah agar sesuai hari pernikahan kalian */
+  const weddingDate = new Date('2026-12-19T08:00:00+07:00').getTime();
+  const dEl = document.getElementById('cd-days');
+  const hEl = document.getElementById('cd-hours');
+  const mEl = document.getElementById('cd-min');
+  const sEl = document.getElementById('cd-sec');
+  function updateCountdown(){
+    const diff = Math.max(0, weddingDate - Date.now());
+    const days = Math.floor(diff/86400000);
+    const hours = Math.floor(diff/3600000)%24;
+    const mins = Math.floor(diff/60000)%60;
+    const secs = Math.floor(diff/1000)%60;
+    if (dEl) dEl.textContent = String(days).padStart(2,'0');
+    if (hEl) hEl.textContent = String(hours).padStart(2,'0');
+    if (mEl) mEl.textContent = String(mins).padStart(2,'0');
+    if (sEl) sEl.textContent = String(secs).padStart(2,'0');
+  }
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+  /* ---------- Mobile check (lighten ambient effects on smaller screens) ---------- */
+  const isMobile = window.innerWidth <= 600;
+
+  /* ---------- Grass blades ---------- */
+  const grass = document.getElementById('grass');
+  if (grass) {
+    const grassCount = isMobile ? 30 : 46;
+    for (let i=0;i<grassCount;i++){
+      const b = document.createElement('span');
+      b.className = 'blade';
+      const h = 22 + Math.random()*30;
+      b.style.height = h+'px';
+      b.style.animationDuration = (2.4+Math.random()*2.2)+'s';
+      b.style.animationDelay = (Math.random()*-3)+'s';
+      grass.appendChild(b);
+    }
+  }
+
+  /* ---------- Fireflies (cover only) ---------- */
+  const fireflyLayer = document.getElementById('fireflies');
+  if (fireflyLayer) {
+    const fireflyCount = isMobile ? 10 : 16;
+    for (let i=0;i<fireflyCount;i++){
+      const f = document.createElement('span');
+      f.className = 'firefly';
+      f.style.left = Math.random()*100+'%';
+      f.style.top = (10+Math.random()*70)+'%';
+      f.style.animationDuration = (5+Math.random()*7)+'s';
+      f.style.animationDelay = (Math.random()*5)+'s';
+      fireflyLayer.appendChild(f);
+    }
+  }
+
+  /* ---------- Bridge stars (voyage scene only) ---------- */
+  const starLayer = document.getElementById('bridgeStars');
+  if (starLayer) {
+    const starCount = isMobile ? 16 : 22;
+    for (let i=0;i<starCount;i++){
+      const s = document.createElement('span');
+      s.className = 'star';
+      s.style.left = Math.random()*100+'%';
+      s.style.top = (Math.random()*50)+'%';
+      s.style.animationDuration = (2.4+Math.random()*3)+'s';
+      s.style.animationDelay = (Math.random()*-4)+'s';
+      starLayer.appendChild(s);
+    }
+  }
+
+  /* ---------- Falling leaves & petals (whole page) ---------- */
+  const leafLayer = document.getElementById('leaves');
+  const leafSVG = '<svg viewBox="0 0 32 32"><path d="M16 2C7 9 3 19 16 30C29 19 25 9 16 2Z"/></svg>';
+  const petalSVG = '<svg viewBox="0 0 32 32"><path d="M16 4C22 8 27 15 22 23C19 28 13 28 10 23C5 15 10 8 16 4Z"/></svg>';
+  if (leafLayer) {
+    const leafCount = isMobile ? 10 : 16;
+    for (let i=0;i<leafCount;i++){
+      const l = document.createElement('span');
+      const isPetal = i % 3 === 0;
+      l.className = 'leaf leaf-'+(i%3)+(isPetal ? ' is-petal' : '');
+      l.innerHTML = isPetal ? petalSVG : leafSVG;
+      l.style.left = Math.random()*100+'vw';
+      l.style.setProperty('--sway', (Math.random()*90-45)+'px');
+      l.style.animationDuration = (11+Math.random()*11)+'s';
+      l.style.animationDelay = (Math.random()*-20)+'s';
+      if (isPetal) l.style.width = l.style.height = (12+Math.random()*4)+'px';
+      leafLayer.appendChild(l);
+    }
+  }
+
+  /* ---------- Gate open → bridging voyage → invitation reveal ---------- */
+  const openBtn = document.getElementById('openInvite');
+  const gate = document.getElementById('gate');
+  const cover = document.getElementById('cover');
+  const audio = document.getElementById('bgAudio');
+  const musicToggle = document.getElementById('musicToggle');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let opened = false;
+  openBtn && openBtn.addEventListener('click', () => {
+    if (opened) return;
+    opened = true;
+    gate.classList.add('is-open');
+    document.body.classList.add('invite-open');
+    if (audio) {
+      audio.play().then(()=>{ musicToggle && musicToggle.classList.add('is-playing'); }).catch(()=>{});
+    }
+
+    /* Gerbang taman memberi jalan ke pelayaran singkat di malam hari.
+       Kapal berlayar utuh dari kiri ke kanan (6.8d), baru setelah itu
+       cahaya bulan membesar & makin terang (2.8d), baru undangan muncul —
+       supaya tidak berpindah mendadak. */
+    const toBridge = reduceMotion ? 150 : 950;
+    const toContent = reduceMotion ? 550 : 10650;
+
+    setTimeout(() => {
+      cover.classList.add('show-bridge');
+    }, toBridge);
+
+    setTimeout(() => {
+      cover.classList.add('is-hidden');
+      document.body.classList.remove('invite-locked');
+      document.body.classList.add('content-visible');
+    }, toContent);
+  });
+
+  musicToggle && musicToggle.addEventListener('click', () => {
+    if (!audio) return;
+    if (audio.paused) {
+      audio.play().then(()=>musicToggle.classList.add('is-playing')).catch(()=>{});
+    } else {
+      audio.pause();
+      musicToggle.classList.remove('is-playing');
+    }
+  });
+
+  /* ---------- Scroll reveal ---------- */
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e => { if (e.isIntersecting){ e.target.classList.add('in-view'); io.unobserve(e.target); } });
+  }, { threshold:0.18 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  /* ---------- Dot nav active state ---------- */
+  const dots = document.querySelectorAll('.dot-nav a');
+  const navIO = new IntersectionObserver((entries)=>{
+    entries.forEach(entry => {
+      const dot = document.querySelector('.dot-nav a[href="#'+entry.target.id+'"]');
+      if (dot && entry.isIntersecting) {
+        dots.forEach(d => d.classList.remove('is-active'));
+        dot.classList.add('is-active');
+      }
+    });
+  }, { threshold:0.5 });
+  document.querySelectorAll('section[id]').forEach(s => navIO.observe(s));
+
+  /* ---------- Growing vine: sulur yang tumbuh mengikuti seberapa jauh tamu membaca ---------- */
+  const vinePath = document.getElementById('vinePath');
+  if (vinePath) {
+    const vineLen = vinePath.getTotalLength();
+    vinePath.style.strokeDasharray = vineLen;
+    vinePath.style.strokeDashoffset = vineLen;
+    const vineMarkers = document.querySelectorAll('#growVine [data-threshold]');
+
+    let vineTicking = false;
+    function updateVine(){
+      const scrollable = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
+      const percent = Math.min(1, Math.max(0, window.scrollY / scrollable));
+      vinePath.style.strokeDashoffset = vineLen * (1 - percent);
+      vineMarkers.forEach(m => {
+        m.classList.toggle('is-grown', percent >= parseFloat(m.getAttribute('data-threshold')));
+      });
+      vineTicking = false;
+    }
+    window.addEventListener('scroll', () => {
+      if (vineTicking) return;
+      vineTicking = true;
+      requestAnimationFrame(updateVine);
+    }, { passive:true });
+    updateVine();
+  }
+
+  /* ---------- Hill parallax (rAF-throttled for smooth mobile scroll) ---------- */
+  const hills = document.querySelectorAll('.hill');
+  let hillsTicking = false;
+  window.addEventListener('scroll', () => {
+    if (hillsTicking) return;
+    hillsTicking = true;
+    requestAnimationFrame(() => {
+      const y = window.scrollY;
+      hills.forEach((el,i) => { el.style.transform = 'translateY('+(y*(0.04*(i+1)))+'px)'; });
+      hillsTicking = false;
+    });
+  }, { passive:true });
+
+  /* ---------- Gift toggle ---------- */
+  const giftToggle = document.getElementById('giftToggle');
+  const giftPanel = document.getElementById('giftPanel');
+  giftToggle && giftToggle.addEventListener('click', () => {
+    giftPanel.classList.toggle('is-open');
+    giftToggle.textContent = giftPanel.classList.contains('is-open') ? 'Tutup Amplop Digital' : 'Buka Amplop Digital';
+  });
+
+  /* ---------- Copy to clipboard ---------- */
+  document.querySelectorAll('[data-copy]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const text = btn.getAttribute('data-copy');
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+          const original = btn.textContent;
+          btn.textContent = 'Tersalin!';
+          setTimeout(()=> btn.textContent = original, 1600);
+        }).catch(()=>{});
+      }
+    });
+  });
+
+  /* ---------- RSVP / Wishes wall (tersimpan di Google Spreadsheet lewat Vercel Serverless Function) ---------- */
+  /* Backend-nya ada di /api/rsvp.js — lihat file itu untuk setup env var Google Service Account di Vercel */
+  const SHEET_API_URL = '/api/rsvp';
+
+  const wishForm = document.getElementById('wishForm');
+  const wishList = document.getElementById('wishList');
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  async function loadWishes(){
+    try {
+      const res = await fetch(SHEET_API_URL);
+      const data = await res.json();
+      return Array.isArray(data) ? data : [];
+    } catch (err) {
+      console.error('Gagal memuat ucapan dari Google Sheet:', err);
+      /* Fallback tampilan jika API /api/rsvp belum ter-deploy / env var belum diisi di Vercel */
+      return [
+        { name:'Keluarga Besar', status:'hadir', message:'Selamat menempuh hidup baru! Semoga sakinah, mawaddah, warahmah. Kami tunggu di taman ya!' },
+        { name:'Sahabat Kantor', status:'hadir', message:'Akhirnya! Bahagia terus buat kalian berdua. Sampai ketemu di garden party-nya 🌿' }
+      ];
+    }
+  }
+
+  /* Kartu ucapan yang sudah masuk ditampilkan sebagai dua baris yang melayang pelan
+     dan bergeser otomatis berlawanan arah — berhenti sejenak saat disentuh/hover. */
+  function wishCardHtml(w, idx){
+    const statusLabel = w.status === 'hadir' ? 'Insya Allah Hadir' : (w.status === 'tidak' ? 'Belum Bisa Hadir' : 'Masih Ragu');
+    const floatDur = (4.5 + (idx % 5) * 0.6).toFixed(1) + 's';
+    const floatDelay = (idx * -0.35).toFixed(2) + 's';
+    return '<div class="wish-card" style="--float-dur:'+floatDur+';animation-delay:'+floatDelay+'">'
+      + '<div class="wish-head"><strong><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C7 6 4 10 4 14a8 8 0 0 0 16 0c0-4-3-8-8-12Z"/></svg>'+escapeHtml(w.name)+'</strong>'
+      + '<span class="wish-status">'+statusLabel+'</span></div>'
+      + '<p>'+escapeHtml(w.message)+'</p></div>';
+  }
+
+  function buildWishTrack(rows){
+    if (!rows.length) return '';
+    let set = rows;
+    while (set.length < 6) set = set.concat(rows);
+    const html = set.map(wishCardHtml).join('');
+    return html + html; // set ganda supaya loop mulus (translateX -50%)
+  }
+
+  async function renderWishes(){
+    if (!wishList) return;
+    wishList.innerHTML = '<p style="text-align:center;opacity:.6;font-size:.9rem">Memuat ucapan...</p>';
+    const data = await loadWishes();
+
+    if (!data.length){
+      wishList.innerHTML = '<p class="wishes-empty">Jadilah yang pertama mengirim ucapan &amp; doa untuk kami 🌿</p>';
+      return;
+    }
+
+    const ordered = data.slice().reverse();
+    const rowA = ordered.filter((_, i) => i % 2 === 0);
+    const rowB = ordered.filter((_, i) => i % 2 === 1);
+
+    const trackA = '<div class="wish-track is-anim-a" style="--dur:'+(Math.max(rowA.length,3)*7)+'s">'+buildWishTrack(rowA)+'</div>';
+    const trackB = rowB.length ? '<div class="wish-track is-anim-b" style="--dur:'+(Math.max(rowB.length,3)*8)+'s">'+buildWishTrack(rowB)+'</div>' : '';
+
+    wishList.innerHTML = '<div class="wishes-marquee">'+trackA+trackB+'</div>';
+  }
+
+  /* Taburan kelopak kecil sebagai perayaan singkat saat ucapan berhasil terkirim */
+  function spawnPetalBurst(x, y){
+    if (reduceMotion) return;
+    const colors = ['var(--gold)','var(--clay)','var(--sage)','var(--gold-light)'];
+    for (let i=0;i<14;i++){
+      const p = document.createElement('span');
+      p.className = 'petal-burst';
+      const angle = Math.random()*Math.PI*2;
+      const dist = 55+Math.random()*95;
+      p.style.setProperty('--tx', (Math.cos(angle)*dist)+'px');
+      p.style.setProperty('--ty', (Math.sin(angle)*dist - 45)+'px');
+      p.style.setProperty('--rot', (Math.random()*360)+'deg');
+      p.style.background = colors[i % colors.length];
+      p.style.left = x+'px';
+      p.style.top = y+'px';
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 1000);
+    }
+  }
+
+  wishForm && wishForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('wishName').value.trim();
+    const status = (document.querySelector('input[name="attend"]:checked') || {}).value || 'ragu';
+    const message = document.getElementById('wishMessage').value.trim();
+    if (!name || !message) return;
+
+    const submitBtn = wishForm.querySelector('.submit-btn');
+    const originalLabel = submitBtn ? submitBtn.textContent : '';
+    if (submitBtn) { submitBtn.textContent = 'Mengirim...'; submitBtn.disabled = true; }
+
+    let ok = true;
+    try {
+      /* Same-origin ke serverless function Vercel sendiri, jadi aman pakai application/json langsung */
+      await fetch(SHEET_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, status, message })
+      });
+    } catch (err) {
+      ok = false;
+      console.error('Gagal mengirim ucapan ke Google Sheet:', err);
+    }
+
+    if (ok && submitBtn) {
+      const rect = submitBtn.getBoundingClientRect();
+      spawnPetalBurst(rect.left + rect.width/2, rect.top + rect.height/2);
+    }
+
+    wishForm.reset();
+    if (submitBtn) { submitBtn.textContent = originalLabel; submitBtn.disabled = false; }
+    renderWishes();
+  });
+
+  renderWishes();
+
+  /* ---------- Loader ---------- */
+  window.addEventListener('load', () => {
+    setTimeout(()=> document.getElementById('loader').classList.add('is-done'), 800);
+  });
+  setTimeout(()=> { const l=document.getElementById('loader'); if(l) l.classList.add('is-done'); }, 2500);
+})();
+</script>
+</body>
+</html>
