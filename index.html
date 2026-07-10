@@ -314,8 +314,8 @@ body.invite-open .day-quote{opacity:1;transform:translateY(0);transition-delay:.
   background:radial-gradient(circle,#FBF6EA 0%,var(--gold-light) 55%,rgba(232,213,160,0) 76%);
   box-shadow:0 0 50px 16px rgba(232,213,160,.25);
   z-index:4;
-  animation:moonBloom 4.6s ease-in forwards paused;
-  animation-delay:11.4s;
+  animation:moonBloom 3s ease-in forwards paused;
+  animation-delay:6.5s;
 }
 #cover.show-bridge .bridge-moon{animation-play-state:running;}
 @keyframes moonBloom{
@@ -326,7 +326,7 @@ body.invite-open .day-quote{opacity:1;transform:translateY(0);transition-delay:.
   position:absolute;top:15%;bottom:44%;left:50%;width:2px;transform:translateX(-50%);
   background:linear-gradient(180deg,rgba(232,213,160,.45),rgba(232,213,160,0));filter:blur(1px);
   animation:glimmerFade 1.8s ease-in forwards paused;
-  animation-delay:11.4s;
+  animation-delay:6.5s;
 }
 #cover.show-bridge .moon-glimmer{animation-play-state:running;}
 @keyframes glimmerFade{0%{opacity:1;}100%{opacity:0;}}
@@ -357,7 +357,7 @@ body.invite-open .day-quote{opacity:1;transform:translateY(0);transition-delay:.
 /* Kapal menyelesaikan pelayarannya secara utuh dari kiri ke kanan */
 .ship{
   position:absolute;bottom:18%;left:-18%;width:clamp(110px,26vw,190px);z-index:2;
-  animation:shipSail 11.6s var(--ease) forwards paused;
+  animation:shipSail 7s var(--ease) forwards paused;
 }
 #cover.show-bridge .ship{animation-play-state:running;}
 .ship svg{width:100%;overflow:visible;display:block;}
@@ -389,7 +389,7 @@ body.invite-open .day-quote{opacity:1;transform:translateY(0);transition-delay:.
   font-size:clamp(.95rem,2.4vw,1.2rem);color:var(--gold-light);letter-spacing:.02em;
   opacity:0;transform:translateY(10px);transition:opacity 1.2s ease,transform 1.2s var(--ease);
 }
-#cover.show-bridge .bridge-line--2{opacity:.9;transform:translateY(0);transition-delay:6s;}
+#cover.show-bridge .bridge-line--2{opacity:.9;transform:translateY(0);transition-delay:3.3s;}
 
 /* Konten utama menyatu perlahan setelah kapal berlalu, bukan langsung muncul mendadak */
 #mainContent{opacity:0;transform:translateY(26px);transition:opacity 1.3s var(--ease),transform 1.3s var(--ease);}
@@ -1070,8 +1070,8 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
        pelayaran singkat malam hari. Kapal berlayar utuh dari kiri ke kanan
        (11.6d), baru setelah itu cahaya bulan membesar & makin terang (4.6d),
        baru undangan muncul. */
-    const dayDuration = reduceMotion ? 150 : 10000;
-    const nightDuration = reduceMotion ? 400 : 16450;
+    const dayDuration = reduceMotion ? 150 : 9000;
+    const nightDuration = reduceMotion ? 400 : 10000;
     const toBridge = dayDuration;
     const toContent = dayDuration + nightDuration;
 
