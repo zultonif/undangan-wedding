@@ -427,6 +427,57 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
 .couple-parents{font-size:.92rem;line-height:1.6;color:var(--ink);opacity:.8;max-width:220px;margin:0 auto;}
 .couple-and{font-family:var(--script);font-size:2.6rem;color:var(--gold);text-align:center;}
 
+/* ============ JOURNEY / PERJALANAN KAMI (kapal berlayar tiap tahun saat discroll) ============ */
+.journey{position:relative;max-width:640px;margin:0 auto;}
+.journey-track{
+  position:absolute;top:4px;bottom:4px;left:16px;width:2px;z-index:0;pointer-events:none;
+  border-radius:2px;opacity:.5;
+  background:repeating-linear-gradient(180deg,var(--gold) 0 7px, transparent 7px 15px);
+}
+.journey-ship{
+  position:absolute;top:0;left:17px;width:40px;transform:translate(-50%,0);
+  will-change:transform;z-index:2;filter:drop-shadow(0 4px 6px rgba(16,22,13,.3));
+}
+.journey-ship svg{width:100%;display:block;overflow:visible;}
+.journey-ship__hull{fill:var(--gold);stroke:var(--forest-deep);stroke-width:1;}
+.journey-ship__mast{stroke:var(--forest);stroke-width:2;}
+.journey-ship__sail{fill:var(--cream);}
+.journey-ship__sail--jib{fill:var(--cream-dim);}
+.journey-ship__wake{fill:none;stroke:var(--sage);stroke-width:1.5;opacity:.45;}
+
+.journey-list{position:relative;z-index:1;display:flex;flex-direction:column;gap:2.6rem;padding-left:48px;}
+.journey-item{position:relative;}
+.journey-dot{
+  position:absolute;top:6px;left:-39px;width:14px;height:14px;border-radius:50%;
+  background:var(--cream);border:2px solid var(--gold);
+  transition:background .5s var(--ease),transform .5s var(--ease),box-shadow .5s var(--ease);
+}
+.journey-item.is-reached .journey-dot{background:var(--gold);transform:scale(1.15);box-shadow:0 0 0 5px rgba(199,162,78,.2);}
+.journey-item:last-child .journey-dot{width:18px;height:18px;top:3px;left:-41px;}
+.journey-item:last-child .journey-dot::after{content:'';position:absolute;inset:-6px;border:1px solid var(--gold);border-radius:50%;opacity:0;}
+.journey-item:last-child.is-reached .journey-dot::after{opacity:.7;animation:ringPulse 2.2s ease-out infinite;}
+
+.journey-card{
+  background:var(--white-soft);border-radius:16px;padding:1.25rem 1.5rem;text-align:left;
+  box-shadow:var(--shadow-soft);border:1px solid rgba(189,155,74,.25);
+}
+.journey-year{
+  display:inline-block;font-family:var(--serif);font-weight:600;font-size:.82rem;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--clay);margin-bottom:.35rem;
+}
+.journey-card h3{font-family:var(--serif);font-size:1.25rem;color:var(--forest);margin-bottom:.4rem;}
+.journey-card p{font-size:.9rem;line-height:1.75;opacity:.82;}
+.journey-item:last-child .journey-card{border-color:var(--gold);}
+
+@media (max-width:600px){
+  .journey-track{left:12px;}
+  .journey-ship{left:13px;width:32px;}
+  .journey-list{padding-left:38px;gap:2rem;}
+  .journey-dot{left:-32px;width:12px;height:12px;}
+  .journey-item:last-child .journey-dot{left:-34px;width:16px;height:16px;}
+  .journey-card{padding:1.05rem 1.25rem;}
+}
+
 /* ============ COUNTDOWN ============ */
 #countdown{background:var(--forest);color:var(--cream);position:relative;}
 .countdown{display:flex;justify-content:center;gap:.9rem;flex-wrap:wrap;position:relative;z-index:2;}
@@ -649,6 +700,7 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
 <!-- ================= DOT NAV ================= -->
 <nav class="dot-nav" aria-label="Navigasi bagian">
   <a href="#couple" aria-label="Mempelai"></a>
+  <a href="#journey" aria-label="Perjalanan Kami"></a>
   <a href="#countdown" aria-label="Hitung mundur"></a>
   <a href="#events" aria-label="Acara"></a>
   <a href="#gallery" aria-label="Galeri"></a>
@@ -787,6 +839,82 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
           <p class="couple-role">Mempelai Wanita</p>
           <!-- GANTI dengan nama orang tua asli -->
           <p class="couple-parents">Putri dari Bapak Hendra Wijaya &amp; Ibu Ratna Sari</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PERJALANAN KAMI (kisah cinta) -->
+  <!-- GANTI tahun, judul, dan cerita tiap momen di bawah dengan kisah perjalanan kalian yang sebenarnya.
+       Mau nambah atau kurangi momen? Tinggal salin/hapus satu blok <div class="journey-item reveal">...</div> —
+       kapal & efek scroll-nya otomatis menyesuaikan tanpa perlu ubah kode lain. -->
+  <section id="journey" class="section">
+    <div class="section-inner">
+      <span class="section-label reveal">Kisah Kami</span>
+      <h2 class="section-title reveal">Perjalanan Kami</h2>
+      <p class="section-sub reveal">Setiap kapal punya haluannya sendiri. Berikut sekilas perjalanan kami — dari pertemuan pertama, hingga berlabuh di hari yang berbahagia ini.</p>
+
+      <div class="journey">
+        <div class="journey-track" id="journeyTrack" aria-hidden="true"></div>
+        <div class="journey-ship" id="journeyShip" aria-hidden="true">
+          <svg viewBox="0 0 60 56">
+            <ellipse class="journey-ship__wake" cx="30" cy="42" rx="26" ry="3"/>
+            <path class="journey-ship__hull" d="M6,37 C18,46 42,46 54,37 L48,43 C38,49 22,49 12,43 Z"/>
+            <line class="journey-ship__mast" x1="30" y1="37" x2="30" y2="8"/>
+            <path class="journey-ship__sail" d="M30,10 C44,18 44,32 30,36 Z"/>
+            <path class="journey-ship__sail--jib" d="M30,18 L14,32 L30,34 Z"/>
+          </svg>
+        </div>
+
+        <div class="journey-list">
+          <div class="journey-item reveal" data-year="2021">
+            <span class="journey-dot"></span>
+            <div class="journey-card">
+              <span class="journey-year">2021</span>
+              <h3>Pertama Bertemu</h3>
+              <!-- GANTI dengan cerita pertemuan pertama kalian -->
+              <p>Dua arah yang tak terduga akhirnya bersilangan. Ceritakan di sini bagaimana dan di mana kalian pertama kali bertemu.</p>
+            </div>
+          </div>
+
+          <div class="journey-item reveal" data-year="2022">
+            <span class="journey-dot"></span>
+            <div class="journey-card">
+              <span class="journey-year">2022</span>
+              <h3>Semakin Dekat</h3>
+              <!-- GANTI dengan cerita momen semakin dekat -->
+              <p>Obrolan yang tak pernah habis, waktu yang terasa singkat. Ceritakan momen yang membuat kalian semakin yakin satu sama lain.</p>
+            </div>
+          </div>
+
+          <div class="journey-item reveal" data-year="2024">
+            <span class="journey-dot"></span>
+            <div class="journey-card">
+              <span class="journey-year">2024</span>
+              <h3>Berkomitmen Bersama</h3>
+              <!-- GANTI dengan cerita momen resmi berpacaran/berkomitmen -->
+              <p>Dari dua arah yang berbeda, kami sepakat memilih haluan yang sama. Ceritakan momen kalian resmi menjalin hubungan.</p>
+            </div>
+          </div>
+
+          <div class="journey-item reveal" data-year="2025">
+            <span class="journey-dot"></span>
+            <div class="journey-card">
+              <span class="journey-year">2025</span>
+              <h3>Lamaran</h3>
+              <!-- GANTI dengan cerita momen lamaran -->
+              <p>Sebuah janji yang mengikat dua hati untuk terus berlayar bersama. Ceritakan momen lamaran kalian di sini.</p>
+            </div>
+          </div>
+
+          <div class="journey-item reveal" data-year="2026">
+            <span class="journey-dot"></span>
+            <div class="journey-card">
+              <span class="journey-year">19 Desember 2026</span>
+              <h3>Berlabuh di Hari Bahagia</h3>
+              <p>Setelah perjalanan panjang, kapal kami akhirnya berlabuh — dua hati bersatu dalam ikatan pernikahan, untuk melanjutkan pelayaran selamanya.</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1139,6 +1267,46 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
       requestAnimationFrame(updateVine);
     }, { passive:true });
     updateVine();
+  }
+
+  /* ---------- Journey timeline: kapal berlayar mengikuti scroll, "berlabuh" di tiap tahun ---------- */
+  const journeyTrackEl = document.getElementById('journeyTrack');
+  const journeyShipEl = document.getElementById('journeyShip');
+  const journeyItemEls = document.querySelectorAll('.journey-item');
+  if (journeyTrackEl && journeyShipEl) {
+    let journeyTicking = false;
+    function updateJourneyShip(){
+      const rect = journeyTrackEl.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const startLine = vh * 0.82;
+      const endLine = vh * 0.25;
+      const totalDistance = rect.height + (startLine - endLine);
+      const traveled = startLine - rect.top;
+      const percent = Math.min(1, Math.max(0, traveled / totalDistance));
+      const maxY = Math.max(rect.height - 40, 0);
+      const y = percent * maxY;
+      const rot = Math.sin(percent * Math.PI * 10) * 4;
+      journeyShipEl.style.transform = 'translate(-50%,'+y.toFixed(1)+'px) rotate('+rot.toFixed(1)+'deg)';
+      journeyTicking = false;
+    }
+    window.addEventListener('scroll', () => {
+      if (journeyTicking) return;
+      journeyTicking = true;
+      requestAnimationFrame(updateJourneyShip);
+    }, { passive:true });
+    window.addEventListener('resize', updateJourneyShip);
+    updateJourneyShip();
+  }
+  if (journeyItemEls.length) {
+    const journeyIO = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-reached');
+          journeyIO.unobserve(entry.target);
+        }
+      });
+    }, { threshold:0, rootMargin:'0px 0px -32% 0px' });
+    journeyItemEls.forEach(el => journeyIO.observe(el));
   }
 
   /* ---------- Hill parallax (rAF-throttled for smooth mobile scroll) ---------- */
