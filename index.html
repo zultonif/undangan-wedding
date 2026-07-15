@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Zultoni & Beska — Undangan Pernikahan</title>
-<meta name="description" content="Undangan pernikahan digital Zultoni & Beska — Garden Party, 19 Desember 2026">
+<title>Zultoni &amp; Beska — Undangan Pernikahan</title>
+<meta name="description" content="Undangan pernikahan digital Zultoni &amp; Beska — Garden Party, 19 Desember 2026">
 <link rel="icon" type="image/png" href="assets/logo-zb-emblem.png">
 <link rel="apple-touch-icon" href="assets/logo-zb-emblem.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -427,57 +427,6 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
 .couple-parents{font-size:.92rem;line-height:1.6;color:var(--ink);opacity:.8;max-width:220px;margin:0 auto;}
 .couple-and{font-family:var(--script);font-size:2.6rem;color:var(--gold);text-align:center;}
 
-/* ============ JOURNEY / PERJALANAN KAMI (kapal berlayar tiap tahun saat discroll) ============ */
-.journey{position:relative;max-width:640px;margin:0 auto;}
-.journey-track{
-  position:absolute;top:4px;bottom:4px;left:16px;width:2px;z-index:0;pointer-events:none;
-  border-radius:2px;opacity:.5;
-  background:repeating-linear-gradient(180deg,var(--gold) 0 7px, transparent 7px 15px);
-}
-.journey-ship{
-  position:absolute;top:0;left:17px;width:40px;transform:translate(-50%,0);
-  will-change:transform;z-index:2;filter:drop-shadow(0 4px 6px rgba(16,22,13,.3));
-}
-.journey-ship svg{width:100%;display:block;overflow:visible;}
-.journey-ship__hull{fill:var(--gold);stroke:var(--forest-deep);stroke-width:1;}
-.journey-ship__mast{stroke:var(--forest);stroke-width:2;}
-.journey-ship__sail{fill:var(--cream);}
-.journey-ship__sail--jib{fill:var(--cream-dim);}
-.journey-ship__wake{fill:none;stroke:var(--sage);stroke-width:1.5;opacity:.45;}
-
-.journey-list{position:relative;z-index:1;display:flex;flex-direction:column;gap:2.6rem;padding-left:48px;}
-.journey-item{position:relative;}
-.journey-dot{
-  position:absolute;top:6px;left:-39px;width:14px;height:14px;border-radius:50%;
-  background:var(--cream);border:2px solid var(--gold);
-  transition:background .5s var(--ease),transform .5s var(--ease),box-shadow .5s var(--ease);
-}
-.journey-item.is-reached .journey-dot{background:var(--gold);transform:scale(1.15);box-shadow:0 0 0 5px rgba(199,162,78,.2);}
-.journey-item:last-child .journey-dot{width:18px;height:18px;top:3px;left:-41px;}
-.journey-item:last-child .journey-dot::after{content:'';position:absolute;inset:-6px;border:1px solid var(--gold);border-radius:50%;opacity:0;}
-.journey-item:last-child.is-reached .journey-dot::after{opacity:.7;animation:ringPulse 2.2s ease-out infinite;}
-
-.journey-card{
-  background:var(--white-soft);border-radius:16px;padding:1.25rem 1.5rem;text-align:left;
-  box-shadow:var(--shadow-soft);border:1px solid rgba(189,155,74,.25);
-}
-.journey-year{
-  display:inline-block;font-family:var(--serif);font-weight:600;font-size:.82rem;
-  letter-spacing:.14em;text-transform:uppercase;color:var(--clay);margin-bottom:.35rem;
-}
-.journey-card h3{font-family:var(--serif);font-size:1.25rem;color:var(--forest);margin-bottom:.4rem;}
-.journey-card p{font-size:.9rem;line-height:1.75;opacity:.82;}
-.journey-item:last-child .journey-card{border-color:var(--gold);}
-
-@media (max-width:600px){
-  .journey-track{left:12px;}
-  .journey-ship{left:13px;width:32px;}
-  .journey-list{padding-left:38px;gap:2rem;}
-  .journey-dot{left:-32px;width:12px;height:12px;}
-  .journey-item:last-child .journey-dot{left:-34px;width:16px;height:16px;}
-  .journey-card{padding:1.05rem 1.25rem;}
-}
-
 /* ============ COUNTDOWN ============ */
 #countdown{background:var(--forest);color:var(--cream);position:relative;}
 .countdown{display:flex;justify-content:center;gap:.9rem;flex-wrap:wrap;position:relative;z-index:2;}
@@ -487,6 +436,56 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
 }
 .countdown__num{font-family:var(--serif);font-size:2rem;font-weight:600;color:var(--gold-light);line-height:1;}
 .countdown__unit{display:block;margin-top:.4rem;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;opacity:.75;}
+
+/* ============ JOURNEY (Perjalanan Kami — kapal berlayar mengikuti scroll) ============ */
+.journey-track{position:relative;padding:.5rem 0;}
+
+.journey-sea{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:visible;}
+.journey-sea-track{fill:none;stroke:rgba(71,87,58,.09);stroke-width:16;stroke-linecap:round;}
+.journey-sea-line{fill:none;stroke:var(--gold);stroke-width:2;stroke-linecap:round;opacity:.6;}
+
+.journey-ship{
+  position:absolute;top:0;left:0;width:62px;z-index:3;pointer-events:none;
+  transform:translate(-50%,0);will-change:transform;transition:transform .1s linear;
+  filter:drop-shadow(0 6px 10px rgba(40,51,31,.25));
+}
+.journey-ship svg{width:100%;display:block;overflow:visible;}
+#journey .ship__sail{fill:var(--cream-dim);stroke:var(--forest-mid);stroke-width:1;}
+#journey .ship__sail--jib{fill:var(--white-soft);stroke:var(--forest-mid);stroke-width:1;}
+#journey .ship__wake{stroke:var(--sage);opacity:.5;}
+
+.journey-list{position:relative;z-index:2;display:flex;flex-direction:column;gap:.2rem;}
+.journey-item{position:relative;display:grid;grid-template-columns:1fr 44px 1fr;column-gap:1.2rem;align-items:center;padding:2rem 0;}
+.journey-item .journey-anchor{
+  grid-column:2;justify-self:center;position:relative;z-index:2;
+  width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  background:var(--forest);border:1px solid rgba(199,162,78,.4);color:var(--gold-light);
+  box-shadow:var(--shadow-soft);
+  transition:background .5s var(--ease),color .5s var(--ease),box-shadow .5s var(--ease),transform .5s var(--ease);
+}
+.journey-item .journey-anchor svg{width:16px;height:16px;}
+.journey-item.is-passed .journey-anchor{
+  background:var(--gold);color:var(--forest-deep);border-color:var(--gold-light);
+  box-shadow:0 0 0 6px rgba(199,162,78,.22);transform:scale(1.08);
+}
+.journey-card{
+  grid-column:1;text-align:right;background:var(--white-soft);border:1px solid rgba(189,155,74,.22);
+  border-radius:16px;padding:1.3rem 1.5rem;box-shadow:var(--shadow-soft);
+  transition:border-color .5s var(--ease),box-shadow .5s var(--ease);
+}
+.journey-item:nth-child(even) .journey-card{grid-column:3;text-align:left;}
+.journey-item.is-passed .journey-card{border-color:rgba(199,162,78,.5);box-shadow:0 14px 32px rgba(40,51,31,.16);}
+.journey-date{display:block;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--clay);margin-bottom:.35rem;opacity:.9;}
+.journey-card h3{font-family:var(--serif);font-size:1.3rem;color:var(--forest);margin-bottom:.4rem;}
+.journey-card p{font-size:.9rem;line-height:1.65;color:var(--ink);opacity:.78;font-weight:300;}
+
+@media (max-width:720px){
+  .journey-item{grid-template-columns:32px 1fr;column-gap:.9rem;padding:1.5rem 0;}
+  .journey-item .journey-anchor{grid-column:1;width:30px;height:30px;}
+  .journey-item .journey-anchor svg{width:14px;height:14px;}
+  .journey-card,.journey-item:nth-child(even) .journey-card{grid-column:2;text-align:left;}
+  .journey-ship{width:44px;}
+}
 
 /* ============ EVENTS ============ */
 .event-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem;}
@@ -700,7 +699,7 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
 <!-- ================= DOT NAV ================= -->
 <nav class="dot-nav" aria-label="Navigasi bagian">
   <a href="#couple" aria-label="Mempelai"></a>
-  <a href="#journey" aria-label="Perjalanan Kami"></a>
+  <a href="#journey" aria-label="Perjalanan kami"></a>
   <a href="#countdown" aria-label="Hitung mundur"></a>
   <a href="#events" aria-label="Acara"></a>
   <a href="#gallery" aria-label="Galeri"></a>
@@ -844,78 +843,76 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
     </div>
   </section>
 
-  <!-- PERJALANAN KAMI (kisah cinta) -->
-  <!-- GANTI tahun, judul, dan cerita tiap momen di bawah dengan kisah perjalanan kalian yang sebenarnya.
-       Mau nambah atau kurangi momen? Tinggal salin/hapus satu blok <div class="journey-item reveal">...</div> —
-       kapal & efek scroll-nya otomatis menyesuaikan tanpa perlu ubah kode lain. -->
+  <!-- JOURNEY (Perjalanan Kami) -->
+  <!-- GANTI tanggal & cerita di setiap .journey-card dengan kisah asli kalian.
+       Kapal di bagian ini akan berlayar mengikuti sulur alur mengikuti scroll,
+       melewati tiap tonggak cerita — echo dari kapal malam di pembuka undangan. -->
   <section id="journey" class="section">
     <div class="section-inner">
       <span class="section-label reveal">Kisah Kami</span>
       <h2 class="section-title reveal">Perjalanan Kami</h2>
-      <p class="section-sub reveal">Setiap kapal punya haluannya sendiri. Berikut sekilas perjalanan kami — dari pertemuan pertama, hingga berlabuh di hari yang berbahagia ini.</p>
+      <p class="section-sub reveal">Seperti kapal yang menembus waktu, inilah beberapa singgahan dalam perjalanan kami — sebelum akhirnya berlabuh di hari bahagia ini.</p>
 
-      <div class="journey">
-        <div class="journey-track" id="journeyTrack" aria-hidden="true"></div>
+      <div class="journey-track" id="journeyTrack">
+        <svg class="journey-sea" id="journeySea" aria-hidden="true">
+          <path id="journeySeaTrack" class="journey-sea-track"></path>
+          <path id="journeySeaLine" class="journey-sea-line"></path>
+        </svg>
+
         <div class="journey-ship" id="journeyShip" aria-hidden="true">
-          <svg viewBox="0 0 60 56">
-            <ellipse class="journey-ship__wake" cx="30" cy="42" rx="26" ry="3"/>
-            <path class="journey-ship__hull" d="M6,37 C18,46 42,46 54,37 L48,43 C38,49 22,49 12,43 Z"/>
-            <line class="journey-ship__mast" x1="30" y1="37" x2="30" y2="8"/>
-            <path class="journey-ship__sail" d="M30,10 C44,18 44,32 30,36 Z"/>
-            <path class="journey-ship__sail--jib" d="M30,18 L14,32 L30,34 Z"/>
+          <svg viewBox="0 0 240 170">
+            <path class="ship__wake" d="M14,132 Q-16,126 -40,133" stroke-width="2" opacity=".4"/>
+            <path class="ship__wake" d="M6,143 Q-22,140 -48,147" stroke-width="2" opacity=".22"/>
+            <path class="ship__hull" d="M18,120 C55,146 185,146 222,120 L206,133 C168,151 72,151 34,133 Z"/>
+            <line class="ship__mast" x1="120" y1="120" x2="120" y2="16" stroke-width="2.4"/>
+            <path class="ship__flag" d="M120,16 L140,22 L120,28 Z"/>
+            <path class="ship__sail" d="M120,20 C160,42 163,88 120,116 Z"/>
+            <path class="ship__sail--jib" d="M120,54 L206,96 L120,110 Z"/>
           </svg>
         </div>
 
-        <div class="journey-list">
-          <div class="journey-item reveal" data-year="2021">
-            <span class="journey-dot"></span>
+        <ol class="journey-list">
+          <li class="journey-item reveal">
+            <div class="journey-anchor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="6" r="2.4"/><path d="M12 8.4V20M6 14a6 6 0 0 0 12 0M4 14h2M18 14h2"/></svg></div>
             <div class="journey-card">
-              <span class="journey-year">2021</span>
-              <h3>Pertama Bertemu</h3>
-              <!-- GANTI dengan cerita pertemuan pertama kalian -->
-              <p>Dua arah yang tak terduga akhirnya bersilangan. Ceritakan di sini bagaimana dan di mana kalian pertama kali bertemu.</p>
+              <span class="journey-date">GANTI · Bulan Tahun</span>
+              <h3>Pertemuan Pertama</h3>
+              <p>GANTI dengan cerita bagaimana kalian pertama kali dipertemukan — lewat teman, kampus, kantor, atau takdir yang tak terduga.</p>
             </div>
-          </div>
-
-          <div class="journey-item reveal" data-year="2022">
-            <span class="journey-dot"></span>
+          </li>
+          <li class="journey-item reveal">
+            <div class="journey-anchor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="6" r="2.4"/><path d="M12 8.4V20M6 14a6 6 0 0 0 12 0M4 14h2M18 14h2"/></svg></div>
             <div class="journey-card">
-              <span class="journey-year">2022</span>
-              <h3>Semakin Dekat</h3>
-              <!-- GANTI dengan cerita momen semakin dekat -->
-              <p>Obrolan yang tak pernah habis, waktu yang terasa singkat. Ceritakan momen yang membuat kalian semakin yakin satu sama lain.</p>
+              <span class="journey-date">GANTI · Bulan Tahun</span>
+              <h3>Menjalin Kasih</h3>
+              <p>GANTI dengan cerita saat kalian mulai menjalin hubungan lebih serius dan mengenal satu sama lain lebih dalam.</p>
             </div>
-          </div>
-
-          <div class="journey-item reveal" data-year="2024">
-            <span class="journey-dot"></span>
+          </li>
+          <li class="journey-item reveal">
+            <div class="journey-anchor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="6" r="2.4"/><path d="M12 8.4V20M6 14a6 6 0 0 0 12 0M4 14h2M18 14h2"/></svg></div>
             <div class="journey-card">
-              <span class="journey-year">2024</span>
-              <h3>Berkomitmen Bersama</h3>
-              <!-- GANTI dengan cerita momen resmi berpacaran/berkomitmen -->
-              <p>Dari dua arah yang berbeda, kami sepakat memilih haluan yang sama. Ceritakan momen kalian resmi menjalin hubungan.</p>
+              <span class="journey-date">GANTI · Bulan Tahun</span>
+              <h3>Restu Kedua Keluarga</h3>
+              <p>GANTI dengan momen saat kalian memperkenalkan hubungan ini kepada keluarga, dan menerima restu dari kedua belah pihak.</p>
             </div>
-          </div>
-
-          <div class="journey-item reveal" data-year="2025">
-            <span class="journey-dot"></span>
+          </li>
+          <li class="journey-item reveal">
+            <div class="journey-anchor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="6" r="2.4"/><path d="M12 8.4V20M6 14a6 6 0 0 0 12 0M4 14h2M18 14h2"/></svg></div>
             <div class="journey-card">
-              <span class="journey-year">2025</span>
+              <span class="journey-date">GANTI · Bulan Tahun</span>
               <h3>Lamaran</h3>
-              <!-- GANTI dengan cerita momen lamaran -->
-              <p>Sebuah janji yang mengikat dua hati untuk terus berlayar bersama. Ceritakan momen lamaran kalian di sini.</p>
+              <p>GANTI dengan cerita hari lamaran — momen penuh haru saat janji untuk melangkah ke jenjang lebih serius resmi terucap.</p>
             </div>
-          </div>
-
-          <div class="journey-item reveal" data-year="2026">
-            <span class="journey-dot"></span>
+          </li>
+          <li class="journey-item reveal">
+            <div class="journey-anchor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="6" r="2.4"/><path d="M12 8.4V20M6 14a6 6 0 0 0 12 0M4 14h2M18 14h2"/></svg></div>
             <div class="journey-card">
-              <span class="journey-year">19 Desember 2026</span>
-              <h3>Berlabuh di Hari Bahagia</h3>
-              <p>Setelah perjalanan panjang, kapal kami akhirnya berlabuh — dua hati bersatu dalam ikatan pernikahan, untuk melanjutkan pelayaran selamanya.</p>
+              <span class="journey-date">19 Desember 2026</span>
+              <h3>Menuju Pelaminan</h3>
+              <p>Dan kini, kapal kami telah menemukan pelabuhannya. Dengan penuh syukur, kami mengundang Anda untuk berlayar bersama menuju babak baru ini.</p>
             </div>
-          </div>
-        </div>
+          </li>
+        </ol>
       </div>
     </div>
   </section>
@@ -1269,46 +1266,6 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
     updateVine();
   }
 
-  /* ---------- Journey timeline: kapal berlayar mengikuti scroll, "berlabuh" di tiap tahun ---------- */
-  const journeyTrackEl = document.getElementById('journeyTrack');
-  const journeyShipEl = document.getElementById('journeyShip');
-  const journeyItemEls = document.querySelectorAll('.journey-item');
-  if (journeyTrackEl && journeyShipEl) {
-    let journeyTicking = false;
-    function updateJourneyShip(){
-      const rect = journeyTrackEl.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const startLine = vh * 0.82;
-      const endLine = vh * 0.25;
-      const totalDistance = rect.height + (startLine - endLine);
-      const traveled = startLine - rect.top;
-      const percent = Math.min(1, Math.max(0, traveled / totalDistance));
-      const maxY = Math.max(rect.height - 40, 0);
-      const y = percent * maxY;
-      const rot = Math.sin(percent * Math.PI * 10) * 4;
-      journeyShipEl.style.transform = 'translate(-50%,'+y.toFixed(1)+'px) rotate('+rot.toFixed(1)+'deg)';
-      journeyTicking = false;
-    }
-    window.addEventListener('scroll', () => {
-      if (journeyTicking) return;
-      journeyTicking = true;
-      requestAnimationFrame(updateJourneyShip);
-    }, { passive:true });
-    window.addEventListener('resize', updateJourneyShip);
-    updateJourneyShip();
-  }
-  if (journeyItemEls.length) {
-    const journeyIO = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-reached');
-          journeyIO.unobserve(entry.target);
-        }
-      });
-    }, { threshold:0, rootMargin:'0px 0px -32% 0px' });
-    journeyItemEls.forEach(el => journeyIO.observe(el));
-  }
-
   /* ---------- Hill parallax (rAF-throttled for smooth mobile scroll) ---------- */
   const hills = document.querySelectorAll('.hill');
   let hillsTicking = false;
@@ -1321,6 +1278,96 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
       hillsTicking = false;
     });
   }, { passive:true });
+
+  /* ---------- Journey voyage: kapal berlayar sepanjang kisah kami, mengikuti scroll ---------- */
+  (function initJourneyVoyage(){
+    const track = document.getElementById('journeyTrack');
+    const ship = document.getElementById('journeyShip');
+    const seaSvg = document.getElementById('journeySea');
+    const seaLine = document.getElementById('journeySeaLine');
+    const seaTrackLine = document.getElementById('journeySeaTrack');
+    const items = document.querySelectorAll('.journey-item');
+    if (!track || !ship || !seaSvg || !seaLine || !items.length) return;
+
+    const WAVE_CYCLES = 2.2;
+    let AMPLITUDE = isMobile ? 8 : 26;
+    if (reduceMotion) AMPLITUDE = 0;
+
+    let trackWidth = 0, trackHeight = 0, centerX = 0;
+    let itemProgress = [];
+
+    function waveX(p){ return centerX + Math.sin(p*Math.PI*2*WAVE_CYCLES)*AMPLITUDE; }
+
+    function layout(){
+      const trackRect = track.getBoundingClientRect();
+      trackWidth = track.clientWidth;
+      trackHeight = track.offsetHeight;
+
+      const firstAnchor = track.querySelector('.journey-anchor');
+      if (firstAnchor){
+        const aRect = firstAnchor.getBoundingClientRect();
+        centerX = (aRect.left + aRect.width/2) - trackRect.left;
+      } else {
+        centerX = trackWidth/2;
+      }
+
+      seaSvg.setAttribute('width', trackWidth);
+      seaSvg.setAttribute('height', trackHeight);
+      seaSvg.setAttribute('viewBox', '0 0 '+trackWidth+' '+trackHeight);
+
+      const steps = 48;
+      let d = '';
+      for (let i=0;i<=steps;i++){
+        const t = i/steps;
+        const x = waveX(t);
+        const y = t*trackHeight;
+        d += (i===0 ? 'M' : 'L') + x.toFixed(1) + ',' + y.toFixed(1) + ' ';
+      }
+      seaLine.setAttribute('d', d.trim());
+      seaTrackLine.setAttribute('d', d.trim());
+
+      itemProgress = Array.from(items).map(item => {
+        const r = item.getBoundingClientRect();
+        const centerY = (r.top + r.height/2) - trackRect.top;
+        return Math.min(1, Math.max(0, trackHeight ? centerY/trackHeight : 0));
+      });
+    }
+
+    function updateShip(){
+      const trackRect = track.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const total = trackRect.height + vh;
+      const passed = vh - trackRect.top;
+      const progress = Math.min(1, Math.max(0, total > 0 ? passed/total : 0));
+
+      const y = progress*trackHeight;
+      const x = waveX(progress);
+
+      const dStep = 0.004;
+      const xAhead = waveX(Math.min(1, progress+dStep));
+      const angle = Math.atan2(xAhead-x, dStep*trackHeight) * (180/Math.PI) * 0.5;
+
+      ship.style.transform = 'translate('+x.toFixed(1)+'px,'+y.toFixed(1)+'px) rotate('+angle.toFixed(1)+'deg)';
+
+      items.forEach((item, i) => {
+        const p = itemProgress[i] || 0;
+        item.classList.toggle('is-passed', progress >= p - 0.02);
+      });
+    }
+
+    let journeyTicking = false;
+    function onJourneyScroll(){
+      if (journeyTicking) return;
+      journeyTicking = true;
+      requestAnimationFrame(() => { updateShip(); journeyTicking = false; });
+    }
+
+    window.addEventListener('scroll', onJourneyScroll, { passive:true });
+    window.addEventListener('resize', () => { layout(); updateShip(); });
+    window.addEventListener('load', () => { layout(); updateShip(); });
+    layout();
+    updateShip();
+  })();
 
   /* ---------- Gift toggle ---------- */
   const giftToggle = document.getElementById('giftToggle');
