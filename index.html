@@ -117,9 +117,13 @@ body.invite-locked{overflow:hidden;height:100vh;height:100dvh;}
   font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--clay);margin-bottom:0;
 }
 .preamble .ornament{
-  width:60px;height:60px;margin:2.2rem auto;color:var(--gold);opacity:.85;
+  width:74px;height:74px;margin:2.2rem auto;color:var(--gold);opacity:.85;
 }
 .preamble .ornament svg{width:100%;height:100%;}
+.preamble .ornament-logo{
+  width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;
+  box-shadow:0 0 0 1px rgba(199,162,78,.45),var(--shadow-soft);
+}
 .preamble .ornament-row{display:flex;align-items:center;justify-content:center;gap:14px;margin:2.4rem auto 0;}
 .preamble .ornament-row .leaf-deco{width:20px;height:20px;color:var(--sage);}
 .preamble .ornament-row .leaf-deco svg{width:100%;height:100%;}
@@ -196,8 +200,19 @@ body.invite-locked{overflow:hidden;height:100vh;height:100dvh;}
 @keyframes loaderMove{0%{transform:translateX(-100%);}100%{transform:translateX(350%);}}
 
 /* ============ COVER / GATE ============ */
-#cover{position:fixed;inset:0;z-index:100;overflow:hidden;transition:opacity .9s ease;}
+#cover{position:fixed;inset:0;z-index:100;overflow:hidden;transition:opacity .9s ease .45s;}
 #cover.is-hidden{opacity:0;pointer-events:none;visibility:hidden;}
+
+/* Lapisan krem yang menutup penuh panggung sebelum #cover memudar, supaya
+   proses fade tidak pernah memperlihatkan hijau tua/vignette gelap
+   ber-blend langsung dengan latar krem body (itu yang bikin belang zaitun).
+   Overlay ini menutup dulu dengan krem solid, baru #cover (beserta overlay
+   di dalamnya) memudar — hasilnya krem bertemu krem, mulus tanpa pinggiran gelap. */
+.cover-fadeout{
+  position:absolute;inset:0;z-index:50;background:var(--cream);
+  opacity:0;pointer-events:none;transition:opacity .5s ease;
+}
+#cover.is-hidden .cover-fadeout{opacity:1;}
 
 .hero-scene{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,#F0CE8E 0%,#E39F5E 26%,#BD6650 48%,#7C4147 70%,var(--forest-deep) 100%);}
 .hero-sun{position:absolute;top:24%;left:50%;width:130px;height:130px;border-radius:50%;transform:translate(-50%,-50%);
@@ -1110,6 +1125,10 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
       <p class="bridge-line">Dua Hati, Satu Haluan</p>
       <p class="bridge-line--2">Berlayar bersama, menuju cahaya senja yang abadi</p>
     </div>
+
+    <!-- Menutup panggung malam dengan krem solid sebelum #cover memudar,
+         supaya transisi ke bagian Assalamualaikum tidak belang gelap. -->
+    <div class="cover-fadeout" aria-hidden="true"></div>
   </div>
 </section>
 
@@ -1130,14 +1149,7 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
       <p class="ayat-source reveal reveal-d2">QS. Ar-Rum : 21</p>
 
       <div class="ornament reveal reveal-d3">
-        <svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1.2">
-          <path d="M30 6c6 8-3 12 0 18 3-6-6-10 0-18Z" fill="currentColor" stroke="none"/>
-          <path d="M12 30c8-6 12 3 18 0-6-3-10 6-18 0Z" fill="currentColor" stroke="none"/>
-          <path d="M48 30c-8-6-12 3-18 0 6-3 10 6 18 0Z" fill="currentColor" stroke="none"/>
-          <path d="M30 54c6-8-3-12 0-18-3 6 6 10 0 18Z" fill="currentColor" stroke="none"/>
-          <circle cx="30" cy="30" r="5" fill="currentColor" stroke="none"/>
-          <circle cx="30" cy="30" r="16" opacity=".5"/>
-        </svg>
+        <img src="assets/logo-zb-emblem.png" alt="Zultoni &amp; Beska" class="ornament-logo">
       </div>
 
       <div class="ornament-row reveal reveal-d3">
@@ -1576,16 +1588,16 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
     }
 
     /* Gerbang taman dibuka lalu suasana siang/pegunungan dibiarkan terlihat
-       selama 10 detik (menampilkan kutipan taman) sebelum berlanjut ke
+       selama 7 detik (menampilkan kutipan taman) sebelum berlanjut ke
        pelayaran singkat malam hari. Kapal berlayar utuh dari kiri ke kanan
        (11.6d), baru setelah itu cahaya bulan membesar & makin terang (4.6d),
        baru undangan muncul. Scene kapal dipastikan benar-benar tuntas
-       memudar (coverHideMs, sesuai transisi opacity #cover) SEBELUM konten
-       mulai muncul — supaya tidak ada momen keduanya tembus pandang
-       bersamaan yang bikin warnanya belang/kelabu. */
-    const dayDuration = reduceMotion ? 150 : 9000;
+       memudar (coverHideMs, sesuai transisi opacity #cover + lapisan krem
+       .cover-fadeout) SEBELUM konten mulai muncul — supaya tidak ada momen
+       keduanya tembus pandang bersamaan yang bikin warnanya belang/kelabu. */
+    const dayDuration = reduceMotion ? 150 : 7000;
     const nightDuration = reduceMotion ? 400 : 10000;
-    const coverHideMs = reduceMotion ? 60 : 900;
+    const coverHideMs = reduceMotion ? 60 : 1400;
     const toBridge = dayDuration;
     const toContent = dayDuration + nightDuration;
 
@@ -1752,9 +1764,16 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
     function updateShip(){
       const trackRect = track.getBoundingClientRect();
       const vh = window.innerHeight;
-      const total = trackRect.height + vh;
-      const passed = vh - trackRect.top;
-      const progress = Math.min(1, Math.max(0, total > 0 ? passed/total : 0));
+
+      /* Progres kapal HANYA dihitung dari saat bagian atas track menyentuh
+         bagian atas viewport, hingga bagian bawah track menyentuh bagian
+         bawah viewport — bukan sejak track baru muncul dari bawah layar.
+         Dengan ini kapal benar-benar diam di titik awal selama track masih
+         di bawah/​belum discroll, dan baru mulai berlayar begitu bagian
+         cerita mulai betul-betul terlihat — jadi animasinya tidak "curi
+         start" sebelum sempat terlihat oleh mata. */
+      const scrollable = Math.max(trackRect.height - vh, 1);
+      const progress = Math.min(1, Math.max(0, (0 - trackRect.top) / scrollable));
 
       const y = progress*trackHeight;
       const x = waveX(progress);
