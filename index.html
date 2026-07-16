@@ -354,27 +354,222 @@ body.invite-open .day-quote{opacity:1;transform:translateY(0);transition-delay:.
 .wave--front{bottom:-2%;animation:waveDrift 5.8s linear infinite;}
 @keyframes waveDrift{0%{transform:translateX(0);}100%{transform:translateX(-4%);}}
 
-/* Kapal menyelesaikan pelayarannya secara utuh dari kiri ke kanan */
+/* Kapal menyelesaikan pelayarannya secara utuh dari kiri ke kanan — perahu
+   berlentera dengan pantulan air, jejak riak & kelip keemasan, serta kelopak
+   yang mengambang di buritan, supaya terasa benar-benar berlayar di malam
+   yang hangat, bukan sekadar siluet bergeser. */
 .ship{
-  position:absolute;bottom:18%;left:-18%;width:clamp(110px,26vw,190px);z-index:2;
+  position:absolute;bottom:18%;left:-18%;width:clamp(120px,28vw,210px);z-index:2;
   animation:shipSail 7s var(--ease) forwards paused;
 }
 #cover.show-bridge .ship{animation-play-state:running;}
-.ship svg{width:100%;overflow:visible;display:block;}
-.ship__hull{fill:var(--gold);stroke:var(--forest-deep);stroke-width:1;}
+.ship svg{width:100%;display:block;}
+.ship__art{overflow:visible;position:relative;z-index:2;}
+.ship__hull{fill:url(#shipHullGrad);stroke:var(--forest-deep);stroke-width:1;}
+.ship__hull-trim{fill:none;stroke:var(--gold-light);stroke-width:.8;opacity:.5;}
+.ship__rigging{stroke:var(--gold-light);stroke-width:.8;opacity:.4;}
 .ship__mast{stroke:var(--gold);}
-.ship__wake{stroke:var(--cream);fill:none;}
-.ship__sail{fill:var(--cream);}
-.ship__sail--jib{fill:var(--cream-dim);}
-.ship__flag{fill:var(--clay);}
+.ship__wake-line{stroke:var(--cream);fill:none;}
+.ship__sail{fill:url(#shipSailGrad);transform-box:fill-box;transform-origin:0% 0%;animation:sailFlutter 3.4s ease-in-out infinite paused;}
+.ship__sail--jib{fill:url(#shipJibGrad);transform-box:fill-box;transform-origin:0% 50%;animation:sailFlutter 3.8s ease-in-out infinite reverse paused;}
+.ship__flag{fill:var(--clay);transform-box:fill-box;transform-origin:0% 50%;animation:flagWave 1.6s ease-in-out infinite paused;}
+.ship__lantern{fill:var(--gold-light);}
+.ship__lantern-line{stroke:var(--gold);stroke-width:1;opacity:.6;}
+#cover.show-bridge .ship__sail,
+#cover.show-bridge .ship__sail--jib,
+#cover.show-bridge .ship__flag{animation-play-state:running;}
+@keyframes flagWave{
+  0%,100%{transform:scaleX(1) skewY(0deg);}
+  50%{transform:scaleX(.85) skewY(6deg);}
+}
+@keyframes sailFlutter{
+  0%,100%{transform:skewX(0deg) scaleX(1);}
+  50%{transform:skewX(-2.2deg) scaleX(1.015);}
+}
 @keyframes shipSail{
-  0%{left:-18%;transform:translateY(0) rotate(-1.6deg);}
-  18%{transform:translateY(-9px) rotate(1.2deg);}
-  36%{transform:translateY(-2px) rotate(-1deg);}
-  54%{transform:translateY(-10px) rotate(1.3deg);}
-  72%{transform:translateY(-3px) rotate(-1.1deg);}
-  88%{transform:translateY(-8px) rotate(1deg);}
-  100%{left:106%;transform:translateY(0) rotate(-1.6deg);}
+  0%{left:-18%;transform:translateY(0) rotate(-1.6deg) scale(.8);}
+  10%{transform:translateY(-6px) rotate(.4deg) scale(.92);}
+  18%{transform:translateY(-9px) rotate(1.2deg) scale(1);}
+  36%{transform:translateY(-2px) rotate(-1deg) scale(1.05);}
+  50%{transform:translateY(-11px) rotate(1.4deg) scale(1.08);}
+  54%{transform:translateY(-10px) rotate(1.3deg) scale(1.07);}
+  72%{transform:translateY(-3px) rotate(-1.1deg) scale(1.02);}
+  88%{transform:translateY(-8px) rotate(1deg) scale(.92);}
+  100%{left:106%;transform:translateY(0) rotate(-1.6deg) scale(.8);}
+}
+
+/* Pantulan kapal di air — pudar & sedikit "beriak" agar terasa mengapung sungguhan */
+.ship__reflection{
+  position:absolute;left:0;top:100%;width:100%;height:66%;overflow:hidden;z-index:1;
+  opacity:.32;filter:blur(1.6px);transform:scaleY(-1);
+  -webkit-mask-image:linear-gradient(180deg,#000,transparent 80%);
+          mask-image:linear-gradient(180deg,#000,transparent 80%);
+  animation:reflectionRipple 3.2s ease-in-out infinite paused;
+}
+#cover.show-bridge .ship__reflection{animation-play-state:running;}
+.ship__reflection svg{width:100%;display:block;}
+.ship__reflection .ship__hull{fill:var(--gold);opacity:.8;stroke:none;}
+.ship__reflection .ship__sail{fill:var(--cream);opacity:.55;animation:none;}
+.ship__reflection .ship__sail--jib{fill:var(--cream-dim);opacity:.45;animation:none;}
+@keyframes reflectionRipple{
+  0%,100%{transform:scaleY(-1) scaleX(1);}
+  50%{transform:scaleY(-1.04) scaleX(.985);}
+}
+
+/* Lentera haluan & buritan — dua titik hangat yang berdenyut lembut di gelapnya laut */
+.ship__lantern-glow{
+  position:absolute;width:22px;height:22px;z-index:3;border-radius:50%;pointer-events:none;
+  transform:translate(-50%,-50%);mix-blend-mode:screen;
+  background:radial-gradient(circle,rgba(234,217,166,.95) 0%,rgba(199,162,78,.4) 48%,rgba(199,162,78,0) 75%);
+  animation:lanternFlicker 2.6s ease-in-out infinite paused;
+}
+#cover.show-bridge .ship__lantern-glow{animation-play-state:running;}
+.ship__lantern-glow--stern{left:11.7%;top:71.8%;}
+.ship__lantern-glow--bow{left:84.6%;top:68.2%;animation-delay:1.1s;}
+@keyframes lanternFlicker{
+  0%,100%{opacity:.7;transform:translate(-50%,-50%) scale(1);}
+  50%{opacity:1;transform:translate(-50%,-50%) scale(1.18);}
+}
+
+/* Riak, kelip keemasan & kelopak yang mengambang di buritan */
+.ship__wake{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:visible;}
+.ship__wake-ring{
+  position:absolute;bottom:15%;border:1.4px solid var(--gold-light);border-radius:50%;opacity:0;
+  animation:wakeRingExpand 2.3s ease-out infinite paused;
+}
+#cover.show-bridge .ship__wake-ring{animation-play-state:running;}
+.ship__wake-ring--1{left:1%;width:24px;height:9px;animation-delay:0s;}
+.ship__wake-ring--2{left:10%;width:18px;height:7px;animation-delay:.75s;}
+.ship__wake-ring--3{left:18%;width:13px;height:5px;animation-delay:1.5s;}
+@keyframes wakeRingExpand{
+  0%{transform:scale(.4);opacity:.5;}
+  100%{transform:scale(2.3);opacity:0;}
+}
+.ship__sparkle{
+  position:absolute;width:3px;height:3px;border-radius:50%;background:var(--gold-light);
+  box-shadow:0 0 6px 2px rgba(234,217,166,.8);opacity:0;
+  animation:sparkleDrift ease-in-out infinite paused;
+}
+#cover.show-bridge .ship__sparkle{animation-play-state:running;}
+.ship__sparkle--1{left:3%;bottom:24%;animation-duration:2.6s;animation-delay:0s;}
+.ship__sparkle--2{left:12%;bottom:13%;animation-duration:3.1s;animation-delay:.6s;}
+.ship__sparkle--3{left:21%;bottom:27%;animation-duration:2.8s;animation-delay:1.3s;}
+.ship__sparkle--4{left:8%;bottom:32%;animation-duration:3.4s;animation-delay:1.9s;}
+.ship__sparkle--5{left:17%;bottom:20%;animation-duration:2.4s;animation-delay:2.4s;}
+@keyframes sparkleDrift{
+  0%{opacity:0;transform:translateY(0) scale(.5);}
+  30%{opacity:.9;}
+  100%{opacity:0;transform:translateY(-24px) scale(.2);}
+}
+.ship__petal{
+  position:absolute;width:7px;height:7px;border-radius:60% 0 60% 0;opacity:0;
+  animation:petalDriftBack ease-in-out infinite paused;
+}
+#cover.show-bridge .ship__petal{animation-play-state:running;}
+.ship__petal--1{left:5%;bottom:30%;background:var(--sage-light);animation-duration:4.2s;animation-delay:.3s;}
+.ship__petal--2{left:15%;bottom:18%;background:var(--gold-light);animation-duration:4.8s;animation-delay:2.1s;}
+@keyframes petalDriftBack{
+  0%{opacity:0;transform:translate(0,0) rotate(0deg) scale(.7);}
+  20%{opacity:.85;}
+  100%{opacity:0;transform:translate(-26px,-14px) rotate(140deg) scale(.4);}
+}
+
+/* Jejak cahaya bulan di permukaan laut — berkelip lembut tepat di jalur kapal */
+.moon-path{
+  position:absolute;left:50%;top:0;bottom:0;width:130px;transform:translateX(-50%);
+  z-index:2;pointer-events:none;opacity:.6;
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 25%,#000 92%,transparent);
+          mask-image:linear-gradient(180deg,transparent,#000 25%,#000 92%,transparent);
+}
+.moon-glint{
+  position:absolute;left:50%;height:5px;border-radius:50%;
+  background:linear-gradient(90deg,transparent,rgba(234,217,166,.85),transparent);
+  transform:translateX(-50%);filter:blur(.5px);
+  animation:glintShimmer 2.6s ease-in-out infinite paused;
+}
+#cover.show-bridge .moon-glint{animation-play-state:running;}
+.moon-glint:nth-child(1){top:6%;width:74px;animation-delay:0s;}
+.moon-glint:nth-child(2){top:26%;width:58px;animation-delay:.4s;}
+.moon-glint:nth-child(3){top:46%;width:66px;animation-delay:.9s;}
+.moon-glint:nth-child(4){top:66%;width:50px;animation-delay:1.3s;}
+.moon-glint:nth-child(5){top:84%;width:60px;animation-delay:1.8s;}
+@keyframes glintShimmer{
+  0%,100%{opacity:.25;transform:translateX(-50%) scaleX(.85);}
+  50%{opacity:.85;transform:translateX(-50%) scaleX(1.1);}
+}
+
+/* Bintang jatuh — melintas tepat saat kapal berada paling dekat & besar,
+   seperti momen "membuat permintaan" di tengah pelayaran */
+.shooting-star{
+  position:absolute;width:2.5px;height:2.5px;border-radius:50%;background:var(--cream);
+  opacity:0;box-shadow:0 0 6px 2px rgba(250,243,229,.9);z-index:2;
+  animation:shootingStar 1.5s ease-in forwards paused;
+}
+#cover.show-bridge .shooting-star{animation-play-state:running;}
+.shooting-star::before{
+  content:'';position:absolute;top:50%;right:100%;width:64px;height:1px;
+  background:linear-gradient(90deg,rgba(250,243,229,0),rgba(250,243,229,.85));
+  transform:translateY(-50%);
+}
+.shooting-star--1{top:14%;left:58%;--rot:26deg;animation-delay:3.2s;}
+.shooting-star--2{top:22%;left:38%;--rot:20deg;animation-delay:5.1s;}
+.shooting-star--2::before{width:46px;}
+@keyframes shootingStar{
+  0%{opacity:0;transform:rotate(var(--rot)) translateX(0);}
+  8%{opacity:1;}
+  70%{opacity:.9;}
+  100%{opacity:0;transform:rotate(var(--rot)) translateX(150px);}
+}
+
+/* Sekelip hati kecil yang mengambang sekali dari buritan — "harapan yang
+   terkirim", muncul bersamaan dengan bintang jatuh saat kapal paling dekat */
+.ship__wish-heart{
+  position:absolute;left:13%;bottom:34%;width:11px;height:11px;color:var(--gold-light);
+  opacity:0;filter:drop-shadow(0 0 5px rgba(234,217,166,.85));
+  animation:wishHeart 2.2s ease-out forwards paused;
+  animation-delay:3.6s;
+}
+#cover.show-bridge .ship__wish-heart{animation-play-state:running;}
+.ship__wish-heart svg{width:100%;height:100%;fill:currentColor;}
+@keyframes wishHeart{
+  0%{opacity:0;transform:translateY(0) scale(.4) rotate(-8deg);}
+  25%{opacity:.95;transform:translateY(-6px) scale(1) rotate(4deg);}
+  100%{opacity:0;transform:translateY(-32px) scale(.5) rotate(10deg);}
+}
+
+/* Kilau bulan yang menyapu layar — di-clip persis mengikuti siluet badan & layar kapal,
+   bukan kotak persegi, supaya cahayanya benar-benar terasa "mengenai kain layar". */
+.ship__moonlight-sweep-clip{pointer-events:none;}
+.ship__moonlight-sweep{
+  mix-blend-mode:screen;transform-box:fill-box;
+  animation:moonSweepMove 3.4s ease-in-out infinite paused;
+}
+#cover.show-bridge .ship__moonlight-sweep{animation-play-state:running;}
+@keyframes moonSweepMove{
+  0%{transform:translateX(-130px);}
+  100%{transform:translateX(130px);}
+}
+
+/* Awan tipis yang melintas pelan di langit malam — memberi kedalaman di balik bulan */
+.bridge-clouds{position:absolute;inset:0;z-index:1;overflow:hidden;pointer-events:none;opacity:.5;}
+.cloud{
+  position:absolute;border-radius:50%;filter:blur(10px);
+  background:radial-gradient(ellipse at center, rgba(250,243,229,.14), transparent 70%);
+  animation:cloudDrift linear infinite paused;
+}
+#cover.show-bridge .cloud{animation-play-state:running;}
+.cloud--1{top:10%;left:-20%;width:180px;height:36px;animation-duration:26s;}
+.cloud--2{top:22%;left:-30%;width:130px;height:26px;animation-duration:34s;animation-delay:-8s;}
+.cloud--3{top:6%;left:-25%;width:100px;height:20px;animation-duration:30s;animation-delay:-18s;}
+@keyframes cloudDrift{
+  0%{transform:translateX(0);}
+  100%{transform:translateX(140vw);}
+}
+
+/* Vignette lembut — menggelapkan sudut layar agar mata tetap tertuju ke kapal & bulan */
+.bridge-scene::after{
+  content:'';position:absolute;inset:0;z-index:6;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 55%, transparent 45%, rgba(16,22,13,.55) 100%);
 }
 
 .bridge-text{
@@ -437,12 +632,35 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
 .countdown__num{font-family:var(--serif);font-size:2rem;font-weight:600;color:var(--gold-light);line-height:1;}
 .countdown__unit{display:block;margin-top:.4rem;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;opacity:.75;}
 
-/* ============ JOURNEY (Perjalanan Kami — kapal berlayar mengikuti scroll) ============ */
-.journey-track{position:relative;padding:.5rem 0;}
+/* ============ JOURNEY (Perjalanan Kami — peta pelayaran mengikuti scroll) ============ */
+.journey-compass{width:64px;height:64px;margin:0 auto 1.6rem;color:var(--gold);animation:journeyCompassSpin 55s linear infinite;}
+.journey-compass svg{width:100%;height:100%;}
+@keyframes journeyCompassSpin{to{transform:rotate(360deg);}}
+
+.journey-track{position:relative;padding:1.5rem 0 .5rem;}
+
+.journey-ambient{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.journey-cloud{
+  position:absolute;width:130px;height:38px;border-radius:50%;
+  background:radial-gradient(ellipse at center, rgba(122,58,62,.08), rgba(122,58,62,0) 72%);
+  filter:blur(2px);animation:journeyCloudDrift linear infinite;
+}
+.journey-cloud--1{top:4%;animation-duration:42s;}
+.journey-cloud--2{top:44%;width:160px;height:46px;opacity:.7;animation-duration:58s;animation-delay:-20s;}
+@keyframes journeyCloudDrift{0%{left:-16%;}100%{left:112%;}}
+.journey-gull{position:absolute;width:20px;opacity:.5;color:var(--clay);animation:journeyGullDrift linear infinite;}
+.journey-gull svg{width:100%;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;}
+.journey-gull--1{top:12%;animation-duration:24s;}
+.journey-gull--2{top:62%;color:var(--forest-mid);animation-duration:30s;animation-delay:-12s;}
+@keyframes journeyGullDrift{
+  0%{left:-8%;transform:translateY(0);}
+  50%{transform:translateY(-16px);}
+  100%{left:108%;transform:translateY(0);}
+}
 
 .journey-sea{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:visible;}
-.journey-sea-track{fill:none;stroke:rgba(71,87,58,.09);stroke-width:16;stroke-linecap:round;}
-.journey-sea-line{fill:none;stroke:var(--gold);stroke-width:2;stroke-linecap:round;opacity:.6;}
+.journey-sea-track{fill:none;stroke:var(--forest-mid);stroke-width:1.4;stroke-linecap:round;stroke-dasharray:.5 9;opacity:.4;}
+.journey-sea-line{fill:none;stroke:var(--gold);stroke-width:2.6;stroke-linecap:round;stroke-dasharray:9 7;filter:drop-shadow(0 1px 1px rgba(199,162,78,.35));}
 
 .journey-ship{
   position:absolute;top:0;left:0;width:62px;z-index:3;pointer-events:none;
@@ -452,39 +670,75 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
 .journey-ship svg{width:100%;display:block;overflow:visible;}
 #journey .ship__sail{fill:var(--cream-dim);stroke:var(--forest-mid);stroke-width:1;}
 #journey .ship__sail--jib{fill:var(--white-soft);stroke:var(--forest-mid);stroke-width:1;}
-#journey .ship__wake{stroke:var(--sage);opacity:.5;}
+#journey .ship__wake-line{stroke:var(--sage);opacity:.5;}
+#journey .ship__lantern{fill:var(--gold);}
+#journey .ship__lantern-line{stroke:var(--forest-mid);opacity:.7;}
+#journey .journey-ship .ship__sail,
+#journey .journey-ship .ship__sail--jib,
+#journey .journey-ship .ship__flag{animation-play-state:running;}
 
 .journey-list{position:relative;z-index:2;display:flex;flex-direction:column;gap:.2rem;}
-.journey-item{position:relative;display:grid;grid-template-columns:1fr 44px 1fr;column-gap:1.2rem;align-items:center;padding:2rem 0;}
+.journey-item{position:relative;display:grid;grid-template-columns:1fr 46px 1fr;column-gap:1.2rem;align-items:center;padding:2.1rem 0;}
+
 .journey-item .journey-anchor{
-  grid-column:2;justify-self:center;position:relative;z-index:2;
-  width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  background:var(--forest);border:1px solid rgba(199,162,78,.4);color:var(--gold-light);
-  box-shadow:var(--shadow-soft);
+  grid-column:2;justify-self:center;position:relative;z-index:2;width:46px;height:46px;flex-shrink:0;
+}
+.journey-anchor-seal{
+  position:absolute;inset:0;width:100%;height:100%;color:var(--gold);opacity:.5;
+  animation:journeyCompassSpin 70s linear infinite;transition:opacity .5s var(--ease),color .5s var(--ease);
+}
+.journey-anchor-core{
+  position:absolute;inset:9px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:var(--forest);border:1px solid rgba(199,162,78,.4);color:var(--gold-light);box-shadow:var(--shadow-soft);
   transition:background .5s var(--ease),color .5s var(--ease),box-shadow .5s var(--ease),transform .5s var(--ease);
 }
-.journey-item .journey-anchor svg{width:16px;height:16px;}
-.journey-item.is-passed .journey-anchor{
+.journey-anchor-core svg{width:15px;height:15px;}
+.journey-item.is-passed .journey-anchor-seal{opacity:1;color:var(--gold-light);}
+.journey-item.is-passed .journey-anchor-core{
   background:var(--gold);color:var(--forest-deep);border-color:var(--gold-light);
-  box-shadow:0 0 0 6px rgba(199,162,78,.22);transform:scale(1.08);
+  box-shadow:0 0 0 7px rgba(199,162,78,.22);transform:scale(1.1);
 }
+
 .journey-card{
-  grid-column:1;text-align:right;background:var(--white-soft);border:1px solid rgba(189,155,74,.22);
-  border-radius:16px;padding:1.3rem 1.5rem;box-shadow:var(--shadow-soft);
-  transition:border-color .5s var(--ease),box-shadow .5s var(--ease);
+  position:relative;grid-column:1;text-align:right;background:var(--white-soft);
+  border:1px solid rgba(189,155,74,.25);border-radius:6px 26px 6px 26px;
+  padding:1.3rem 1.6rem;box-shadow:var(--shadow-soft);transform:rotate(-1.4deg);
+  transition:transform .6s var(--ease),border-color .5s var(--ease),box-shadow .5s var(--ease);
 }
-.journey-item:nth-child(even) .journey-card{grid-column:3;text-align:left;}
-.journey-item.is-passed .journey-card{border-color:rgba(199,162,78,.5);box-shadow:0 14px 32px rgba(40,51,31,.16);}
+.journey-item:nth-child(even) .journey-card{grid-column:3;text-align:left;border-radius:26px 6px 26px 6px;transform:rotate(1.4deg);}
+.journey-card::before{
+  content:'';position:absolute;top:-7px;right:26px;width:14px;height:14px;border-radius:50%;
+  background:var(--clay);box-shadow:0 3px 5px rgba(20,26,14,.3);
+}
+.journey-item:nth-child(even) .journey-card::before{left:26px;right:auto;}
+.journey-item.is-passed .journey-card{
+  transform:rotate(0deg);border-color:rgba(199,162,78,.55);box-shadow:0 16px 34px rgba(40,51,31,.16);
+}
 .journey-date{display:block;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--clay);margin-bottom:.35rem;opacity:.9;}
 .journey-card h3{font-family:var(--serif);font-size:1.3rem;color:var(--forest);margin-bottom:.4rem;}
 .journey-card p{font-size:.9rem;line-height:1.65;color:var(--ink);opacity:.78;font-weight:300;}
 
+/* Kilau kecil saat kapal singgah di tiap tonggak cerita */
+.journey-spark{position:fixed;width:6px;height:6px;background:var(--gold);border-radius:1px;transform:rotate(45deg);pointer-events:none;z-index:150;animation:journeySparkMove .75s ease-out forwards;}
+@keyframes journeySparkMove{
+  0%{transform:translate(0,0) rotate(45deg) scale(.3);opacity:0;}
+  25%{opacity:1;}
+  100%{transform:translate(var(--tx),var(--ty)) rotate(200deg) scale(1);opacity:0;}
+}
+
 @media (max-width:720px){
-  .journey-item{grid-template-columns:32px 1fr;column-gap:.9rem;padding:1.5rem 0;}
-  .journey-item .journey-anchor{grid-column:1;width:30px;height:30px;}
-  .journey-item .journey-anchor svg{width:14px;height:14px;}
-  .journey-card,.journey-item:nth-child(even) .journey-card{grid-column:2;text-align:left;}
-  .journey-ship{width:44px;}
+  .journey-item{grid-template-columns:38px 1fr;column-gap:.9rem;padding:1.6rem 0;}
+  .journey-item .journey-anchor{grid-column:1;width:38px;height:38px;}
+  .journey-anchor-core{inset:7px;}
+  .journey-anchor-core svg{width:13px;height:13px;}
+  .journey-card,.journey-item:nth-child(even) .journey-card{
+    grid-column:2;text-align:left;transform:none;border-radius:6px 20px 6px 20px;
+  }
+  .journey-item:nth-child(even) .journey-card::before{left:auto;right:22px;}
+  .journey-card::before{right:22px;left:auto;}
+  .journey-item.is-passed .journey-card{transform:none;}
+  .journey-ship{width:42px;}
+  .journey-cloud--1,.journey-cloud--2{opacity:.5;}
 }
 
 /* ============ EVENTS ============ */
@@ -745,26 +999,109 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
 
   <!-- ============ BRIDGE: pelayaran singkat penghubung gerbang → undangan ============ -->
   <div class="bridge-scene" aria-hidden="true">
+    <div class="bridge-clouds" aria-hidden="true">
+      <span class="cloud cloud--1"></span>
+      <span class="cloud cloud--2"></span>
+      <span class="cloud cloud--3"></span>
+    </div>
     <div class="bridge-moon"></div>
     <div class="moon-glimmer"></div>
     <div class="bridge-stars" id="bridgeStars"></div>
+    <span class="shooting-star shooting-star--1" aria-hidden="true"></span>
+    <span class="shooting-star shooting-star--2" aria-hidden="true"></span>
     <div class="dusk-glow"></div>
 
     <div class="bridge-sea">
       <div class="wave wave--back"><svg viewBox="0 0 500 60" preserveAspectRatio="none"><path d="M0,30 Q60,10 125,28 T250,26 T375,30 T500,24 V60 H0 Z" fill="#242E1C"/></svg></div>
       <div class="wave wave--mid"><svg viewBox="0 0 500 60" preserveAspectRatio="none"><path d="M0,34 Q70,16 140,32 T280,30 T420,34 T500,28 V60 H0 Z" fill="#181F12"/></svg></div>
       <div class="wave wave--front"><svg viewBox="0 0 500 60" preserveAspectRatio="none"><path d="M0,40 Q80,22 150,38 T300,36 T450,40 T500,34 V60 H0 Z" fill="#0F140B"/></svg></div>
+      <div class="moon-path" aria-hidden="true">
+        <span class="moon-glint"></span>
+        <span class="moon-glint"></span>
+        <span class="moon-glint"></span>
+        <span class="moon-glint"></span>
+        <span class="moon-glint"></span>
+      </div>
     </div>
 
     <div class="ship">
-      <svg viewBox="0 0 240 170">
-        <path class="ship__wake" d="M14,132 Q-16,126 -40,133" stroke-width="2" opacity=".4"/>
-        <path class="ship__wake" d="M6,143 Q-22,140 -48,147" stroke-width="2" opacity=".22"/>
+      <div class="ship__reflection" aria-hidden="true">
+        <svg viewBox="0 0 240 170">
+          <path class="ship__hull" d="M18,120 C55,146 185,146 222,120 L206,133 C168,151 72,151 34,133 Z"/>
+          <path class="ship__sail" d="M120,20 C160,42 163,88 120,116 Z"/>
+          <path class="ship__sail--jib" d="M120,54 L206,96 L120,110 Z"/>
+        </svg>
+      </div>
+
+      <span class="ship__lantern-glow ship__lantern-glow--stern" aria-hidden="true"></span>
+      <span class="ship__lantern-glow ship__lantern-glow--bow" aria-hidden="true"></span>
+
+      <div class="ship__wake" aria-hidden="true">
+        <span class="ship__wake-ring ship__wake-ring--1"></span>
+        <span class="ship__wake-ring ship__wake-ring--2"></span>
+        <span class="ship__wake-ring ship__wake-ring--3"></span>
+        <span class="ship__sparkle ship__sparkle--1"></span>
+        <span class="ship__sparkle ship__sparkle--2"></span>
+        <span class="ship__sparkle ship__sparkle--3"></span>
+        <span class="ship__sparkle ship__sparkle--4"></span>
+        <span class="ship__sparkle ship__sparkle--5"></span>
+        <span class="ship__petal ship__petal--1"></span>
+        <span class="ship__petal ship__petal--2"></span>
+        <span class="ship__wish-heart" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 21C12 21 3 14.6 3 8.7 3 5.6 5.4 3.3 8.3 3.3 10 3.3 11.3 4.1 12 5.3 12.7 4.1 14 3.3 15.7 3.3 18.6 3.3 21 5.6 21 8.7 21 14.6 12 21 12 21Z"/></svg>
+        </span>
+      </div>
+
+      <svg viewBox="0 0 240 170" class="ship__art">
+        <defs>
+          <linearGradient id="shipHullGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" style="stop-color:var(--gold)"/>
+            <stop offset="100%" style="stop-color:var(--clay)"/>
+          </linearGradient>
+          <linearGradient id="shipSailGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" style="stop-color:var(--cream)"/>
+            <stop offset="100%" style="stop-color:var(--sage-light)"/>
+          </linearGradient>
+          <linearGradient id="shipJibGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" style="stop-color:var(--cream-dim)"/>
+            <stop offset="100%" style="stop-color:var(--sage-light)"/>
+          </linearGradient>
+          <!-- Siluet badan + layar kapal, dipakai untuk meng-clip sapuan kilau bulan
+               supaya bentuknya persis mengikuti kapal, bukan kotak persegi -->
+          <clipPath id="shipSilhouetteClip">
+            <path d="M18,120 C55,146 185,146 222,120 L206,133 C168,151 72,151 34,133 Z"/>
+            <path d="M120,20 C160,42 163,88 120,116 Z"/>
+            <path d="M120,54 L206,96 L120,110 Z"/>
+          </clipPath>
+          <linearGradient id="moonSweepGrad" gradientUnits="userSpaceOnUse" x1="-30" y1="260" x2="110" y2="-50">
+            <stop offset="40%" style="stop-color:var(--gold-light);stop-opacity:0"/>
+            <stop offset="50%" style="stop-color:var(--gold-light);stop-opacity:.75"/>
+            <stop offset="60%" style="stop-color:var(--gold-light);stop-opacity:0"/>
+          </linearGradient>
+        </defs>
+
+        <path class="ship__wake-line" d="M14,132 Q-16,126 -40,133" stroke-width="2" opacity=".4"/>
+        <path class="ship__wake-line" d="M6,143 Q-22,140 -48,147" stroke-width="2" opacity=".22"/>
+
         <path class="ship__hull" d="M18,120 C55,146 185,146 222,120 L206,133 C168,151 72,151 34,133 Z"/>
+        <path class="ship__hull-trim" d="M34,133 C72,151 168,151 206,133"/>
+
+        <line class="ship__rigging" x1="120" y1="30" x2="205" y2="112"/>
+        <line class="ship__rigging" x1="120" y1="30" x2="35" y2="118"/>
         <line class="ship__mast" x1="120" y1="120" x2="120" y2="16" stroke-width="2.4"/>
         <path class="ship__flag" d="M120,16 L140,22 L120,28 Z"/>
+
         <path class="ship__sail" d="M120,20 C160,42 163,88 120,116 Z"/>
         <path class="ship__sail--jib" d="M120,54 L206,96 L120,110 Z"/>
+
+        <line class="ship__lantern-line" x1="28" y1="112" x2="28" y2="119"/>
+        <circle class="ship__lantern" cx="28" cy="122" r="4.2"/>
+        <line class="ship__lantern-line" x1="205" y1="106" x2="205" y2="113"/>
+        <circle class="ship__lantern" cx="205" cy="116" r="4"/>
+
+        <g class="ship__moonlight-sweep-clip" clip-path="url(#shipSilhouetteClip)">
+          <rect class="ship__moonlight-sweep" x="-160" y="-60" width="560" height="290" fill="url(#moonSweepGrad)"/>
+        </g>
       </svg>
     </div>
 
@@ -845,15 +1182,31 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
 
   <!-- JOURNEY (Perjalanan Kami) -->
   <!-- GANTI tanggal & cerita di setiap .journey-card dengan kisah asli kalian.
-       Kapal di bagian ini akan berlayar mengikuti sulur alur mengikuti scroll,
-       melewati tiap tonggak cerita — echo dari kapal malam di pembuka undangan. -->
+       Kapal berlayar menyusuri "peta" bergaya jalur harta karun mengikuti scroll,
+       jalur emasnya tergambar progresif, dan tiap tonggak cerita punya medali ikon sendiri. -->
   <section id="journey" class="section">
     <div class="section-inner">
       <span class="section-label reveal">Kisah Kami</span>
       <h2 class="section-title reveal">Perjalanan Kami</h2>
-      <p class="section-sub reveal">Seperti kapal yang menembus waktu, inilah beberapa singgahan dalam perjalanan kami — sebelum akhirnya berlabuh di hari bahagia ini.</p>
+      <div class="journey-compass reveal" aria-hidden="true">
+        <svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="1">
+          <circle cx="40" cy="40" r="30" opacity=".55"/>
+          <path d="M40 6v10M40 64v10M6 40h10M64 40h10" stroke-width="1.4"/>
+          <path d="M40 13 L45.5 40 L40 67 L34.5 40 Z" fill="currentColor" stroke="none" opacity=".9"/>
+          <path d="M13 40 L40 45.5 L67 40 L40 34.5 Z" fill="currentColor" stroke="none" opacity=".4"/>
+          <circle cx="40" cy="40" r="2.6" fill="currentColor" stroke="none"/>
+        </svg>
+      </div>
+      <p class="section-sub reveal">Ikuti kapal kami menyusuri peta kisah ini — dari titik pertama bertemu, hingga berlabuh di hari bahagia ini.</p>
 
       <div class="journey-track" id="journeyTrack">
+        <div class="journey-ambient" aria-hidden="true">
+          <span class="journey-cloud journey-cloud--1"></span>
+          <span class="journey-cloud journey-cloud--2"></span>
+          <span class="journey-gull journey-gull--1"><svg viewBox="0 0 24 12"><path d="M0 8 Q6 0 12 8 Q18 0 24 8"/></svg></span>
+          <span class="journey-gull journey-gull--2"><svg viewBox="0 0 24 12"><path d="M0 8 Q6 0 12 8 Q18 0 24 8"/></svg></span>
+        </div>
+
         <svg class="journey-sea" id="journeySea" aria-hidden="true">
           <path id="journeySeaTrack" class="journey-sea-track"></path>
           <path id="journeySeaLine" class="journey-sea-line"></path>
@@ -861,19 +1214,31 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
 
         <div class="journey-ship" id="journeyShip" aria-hidden="true">
           <svg viewBox="0 0 240 170">
-            <path class="ship__wake" d="M14,132 Q-16,126 -40,133" stroke-width="2" opacity=".4"/>
-            <path class="ship__wake" d="M6,143 Q-22,140 -48,147" stroke-width="2" opacity=".22"/>
+            <path class="ship__wake-line" d="M14,132 Q-16,126 -40,133" stroke-width="2" opacity=".4"/>
+            <path class="ship__wake-line" d="M6,143 Q-22,140 -48,147" stroke-width="2" opacity=".22"/>
             <path class="ship__hull" d="M18,120 C55,146 185,146 222,120 L206,133 C168,151 72,151 34,133 Z"/>
+            <path class="ship__hull-trim" d="M34,133 C72,151 168,151 206,133"/>
+            <line class="ship__rigging" x1="120" y1="30" x2="205" y2="112"/>
+            <line class="ship__rigging" x1="120" y1="30" x2="35" y2="118"/>
             <line class="ship__mast" x1="120" y1="120" x2="120" y2="16" stroke-width="2.4"/>
             <path class="ship__flag" d="M120,16 L140,22 L120,28 Z"/>
             <path class="ship__sail" d="M120,20 C160,42 163,88 120,116 Z"/>
             <path class="ship__sail--jib" d="M120,54 L206,96 L120,110 Z"/>
+            <line class="ship__lantern-line" x1="28" y1="112" x2="28" y2="119"/>
+            <circle class="ship__lantern" cx="28" cy="122" r="4.2"/>
+            <line class="ship__lantern-line" x1="205" y1="106" x2="205" y2="113"/>
+            <circle class="ship__lantern" cx="205" cy="116" r="4"/>
           </svg>
         </div>
 
         <ol class="journey-list">
           <li class="journey-item reveal">
-            <div class="journey-anchor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="6" r="2.4"/><path d="M12 8.4V20M6 14a6 6 0 0 0 12 0M4 14h2M18 14h2"/></svg></div>
+            <div class="journey-anchor">
+              <svg class="journey-anchor-seal" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18.5" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-dasharray="3.6 4.8"/></svg>
+              <span class="journey-anchor-core">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.4"/><path d="M14.6 9.4 12 12l-2.6 2.6L12 12l2.6-2.6Z" fill="currentColor" stroke="none"/><path d="M12 3.4v1.6M12 19v1.6M3.4 12h1.6M19 12h1.6"/></svg>
+              </span>
+            </div>
             <div class="journey-card">
               <span class="journey-date">GANTI · Bulan Tahun</span>
               <h3>Pertemuan Pertama</h3>
@@ -881,7 +1246,12 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
             </div>
           </li>
           <li class="journey-item reveal">
-            <div class="journey-anchor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="6" r="2.4"/><path d="M12 8.4V20M6 14a6 6 0 0 0 12 0M4 14h2M18 14h2"/></svg></div>
+            <div class="journey-anchor">
+              <svg class="journey-anchor-seal" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18.5" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-dasharray="3.6 4.8"/></svg>
+              <span class="journey-anchor-core">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 19c-4-3-8-6.2-8-10A4.4 4.4 0 0 1 12 6.6 4.4 4.4 0 0 1 20 9c0 3.8-4 7-8 10Z"/></svg>
+              </span>
+            </div>
             <div class="journey-card">
               <span class="journey-date">GANTI · Bulan Tahun</span>
               <h3>Menjalin Kasih</h3>
@@ -889,7 +1259,12 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
             </div>
           </li>
           <li class="journey-item reveal">
-            <div class="journey-anchor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="6" r="2.4"/><path d="M12 8.4V20M6 14a6 6 0 0 0 12 0M4 14h2M18 14h2"/></svg></div>
+            <div class="journey-anchor">
+              <svg class="journey-anchor-seal" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18.5" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-dasharray="3.6 4.8"/></svg>
+              <span class="journey-anchor-core">
+                <svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 9 Q8 1 12 9 Q16 1 22 9"/></svg>
+              </span>
+            </div>
             <div class="journey-card">
               <span class="journey-date">GANTI · Bulan Tahun</span>
               <h3>Restu Kedua Keluarga</h3>
@@ -897,7 +1272,12 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
             </div>
           </li>
           <li class="journey-item reveal">
-            <div class="journey-anchor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="6" r="2.4"/><path d="M12 8.4V20M6 14a6 6 0 0 0 12 0M4 14h2M18 14h2"/></svg></div>
+            <div class="journey-anchor">
+              <svg class="journey-anchor-seal" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18.5" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-dasharray="3.6 4.8"/></svg>
+              <span class="journey-anchor-core">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8.6 10.4 12 4l3.4 6.4H8.6Z"/><circle cx="12" cy="15.4" r="5.2"/></svg>
+              </span>
+            </div>
             <div class="journey-card">
               <span class="journey-date">GANTI · Bulan Tahun</span>
               <h3>Lamaran</h3>
@@ -905,7 +1285,12 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
             </div>
           </li>
           <li class="journey-item reveal">
-            <div class="journey-anchor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="6" r="2.4"/><path d="M12 8.4V20M6 14a6 6 0 0 0 12 0M4 14h2M18 14h2"/></svg></div>
+            <div class="journey-anchor">
+              <svg class="journey-anchor-seal" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18.5" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-dasharray="3.6 4.8"/></svg>
+              <span class="journey-anchor-core">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="6" r="2.4"/><path d="M12 8.4V20M6 14a6 6 0 0 0 12 0M4 14h2M18 14h2"/></svg>
+              </span>
+            </div>
             <div class="journey-card">
               <span class="journey-date">19 Desember 2026</span>
               <h3>Menuju Pelaminan</h3>
@@ -1194,9 +1579,13 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
        selama 10 detik (menampilkan kutipan taman) sebelum berlanjut ke
        pelayaran singkat malam hari. Kapal berlayar utuh dari kiri ke kanan
        (11.6d), baru setelah itu cahaya bulan membesar & makin terang (4.6d),
-       baru undangan muncul. */
+       baru undangan muncul. Scene kapal dipastikan benar-benar tuntas
+       memudar (coverHideMs, sesuai transisi opacity #cover) SEBELUM konten
+       mulai muncul — supaya tidak ada momen keduanya tembus pandang
+       bersamaan yang bikin warnanya belang/kelabu. */
     const dayDuration = reduceMotion ? 150 : 9000;
     const nightDuration = reduceMotion ? 400 : 10000;
+    const coverHideMs = reduceMotion ? 60 : 900;
     const toBridge = dayDuration;
     const toContent = dayDuration + nightDuration;
 
@@ -1206,9 +1595,12 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
 
     setTimeout(() => {
       cover.classList.add('is-hidden');
+    }, toContent);
+
+    setTimeout(() => {
       document.body.classList.remove('invite-locked');
       document.body.classList.add('content-visible');
-    }, toContent);
+    }, toContent + coverHideMs);
   });
 
   musicToggle && musicToggle.addEventListener('click', () => {
@@ -1279,7 +1671,7 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
     });
   }, { passive:true });
 
-  /* ---------- Journey voyage: kapal berlayar sepanjang kisah kami, mengikuti scroll ---------- */
+  /* ---------- Journey voyage: kapal berlayar menyusuri peta kisah kami, mengikuti scroll ---------- */
   (function initJourneyVoyage(){
     const track = document.getElementById('journeyTrack');
     const ship = document.getElementById('journeyShip');
@@ -1289,14 +1681,20 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
     const items = document.querySelectorAll('.journey-item');
     if (!track || !ship || !seaSvg || !seaLine || !items.length) return;
 
-    const WAVE_CYCLES = 2.2;
-    let AMPLITUDE = isMobile ? 8 : 26;
+    const WAVE_CYCLES = 1.7;
+    let AMPLITUDE = isMobile ? 10 : 30;
     if (reduceMotion) AMPLITUDE = 0;
 
-    let trackWidth = 0, trackHeight = 0, centerX = 0;
+    let trackWidth = 0, trackHeight = 0, centerX = 0, seaLineLength = 0;
     let itemProgress = [];
 
-    function waveX(p){ return centerX + Math.sin(p*Math.PI*2*WAVE_CYCLES)*AMPLITUDE; }
+    /* Dua gelombang dipadukan supaya jalur terasa seperti coretan tangan di peta,
+       bukan gelombang sinus yang terlalu rapi/mekanis. */
+    function waveX(p){
+      const primary = Math.sin(p*Math.PI*2*WAVE_CYCLES)*AMPLITUDE;
+      const wobble = Math.sin(p*Math.PI*2*WAVE_CYCLES*2.6 + 1.2)*(AMPLITUDE*0.2);
+      return centerX + primary + wobble;
+    }
 
     function layout(){
       const trackRect = track.getBoundingClientRect();
@@ -1315,7 +1713,7 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
       seaSvg.setAttribute('height', trackHeight);
       seaSvg.setAttribute('viewBox', '0 0 '+trackWidth+' '+trackHeight);
 
-      const steps = 48;
+      const steps = 64;
       let d = '';
       for (let i=0;i<=steps;i++){
         const t = i/steps;
@@ -1325,12 +1723,30 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
       }
       seaLine.setAttribute('d', d.trim());
       seaTrackLine.setAttribute('d', d.trim());
+      seaLineLength = seaLine.getTotalLength ? seaLine.getTotalLength() : 0;
 
       itemProgress = Array.from(items).map(item => {
         const r = item.getBoundingClientRect();
         const centerY = (r.top + r.height/2) - trackRect.top;
         return Math.min(1, Math.max(0, trackHeight ? centerY/trackHeight : 0));
       });
+    }
+
+    function spawnSparkle(x, y){
+      if (reduceMotion) return;
+      const count = 8;
+      for (let i=0;i<count;i++){
+        const s = document.createElement('span');
+        s.className = 'journey-spark';
+        const angle = (Math.PI*2/count)*i + Math.random()*0.4;
+        const dist = 24+Math.random()*22;
+        s.style.setProperty('--tx', (Math.cos(angle)*dist).toFixed(1)+'px');
+        s.style.setProperty('--ty', (Math.sin(angle)*dist).toFixed(1)+'px');
+        s.style.left = x+'px';
+        s.style.top = y+'px';
+        document.body.appendChild(s);
+        setTimeout(() => s.remove(), 800);
+      }
     }
 
     function updateShip(){
@@ -1349,9 +1765,22 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
 
       ship.style.transform = 'translate('+x.toFixed(1)+'px,'+y.toFixed(1)+'px) rotate('+angle.toFixed(1)+'deg)';
 
+      /* Garis emas "tergambar" mengikuti sejauh mana kapal sudah berlayar */
+      if (seaLineLength){
+        seaLine.style.strokeDasharray = seaLineLength;
+        seaLine.style.strokeDashoffset = seaLineLength * (1 - progress);
+      }
+
       items.forEach((item, i) => {
         const p = itemProgress[i] || 0;
-        item.classList.toggle('is-passed', progress >= p - 0.02);
+        if (!item.classList.contains('is-passed') && progress >= p - 0.015){
+          item.classList.add('is-passed');
+          const core = item.querySelector('.journey-anchor-core') || item.querySelector('.journey-anchor');
+          if (core){
+            const r = core.getBoundingClientRect();
+            spawnSparkle(r.left + r.width/2, r.top + r.height/2);
+          }
+        }
       });
     }
 
@@ -1368,6 +1797,7 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
     layout();
     updateShip();
   })();
+
 
   /* ---------- Gift toggle ---------- */
   const giftToggle = document.getElementById('giftToggle');
