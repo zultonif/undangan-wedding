@@ -672,8 +672,17 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
 .countdown__box{
   background:rgba(251,246,234,.06);border:1px solid rgba(232,213,160,.35);border-radius:14px;
   padding:1.1rem 0;width:84px;text-align:center;backdrop-filter:blur(2px);
+  transition:border-color .35s var(--ease),box-shadow .35s var(--ease);
 }
-.countdown__num{font-family:var(--serif);font-size:2rem;font-weight:600;color:var(--gold-light);line-height:1;}
+/* Denyut halus tiap kali angkanya berganti — bukan cuma teks yang diam-diam berubah */
+.countdown__box.is-ticking{
+  border-color:rgba(232,213,160,.75);box-shadow:0 0 0 4px rgba(199,162,78,.16);
+}
+.countdown__num{
+  font-family:var(--serif);font-size:2rem;font-weight:600;color:var(--gold-light);line-height:1;
+  display:inline-block;transition:transform .32s var(--ease),color .32s var(--ease);
+}
+.countdown__box.is-ticking .countdown__num{transform:translateY(-3px) scale(1.1);color:var(--white-soft);}
 .countdown__unit{display:block;margin-top:.4rem;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;opacity:.75;}
 
 /* ============ JOURNEY (Perjalanan Kami — peta pelayaran mengikuti scroll) ============ */
@@ -768,6 +777,109 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
   0%{transform:translate(0,0) rotate(45deg) scale(.3);opacity:0;}
   25%{opacity:1;}
   100%{transform:translate(var(--tx),var(--ty)) rotate(200deg) scale(1);opacity:0;}
+}
+
+/* ===================================================================
+   TIBA DI TUJUAN — kapal berlabuh di tonggak terakhir
+   Layarnya turun/lipat (bukan cuma berhenti mendadak), medali terakhir
+   berpendar lembut selamanya, kartu terakhir dapat lencana "Telah
+   Berlabuh", dan sekali saja meletus perayaan: jangkar turun + riak air +
+   pendar emas + kelopak & hati kecil mengambang. =================== */
+
+/* Layar dilepas dari animasi flutter (animation:none) supaya transisi ke
+   bentuk "terlipat" benar-benar mulus dari posisi terakhirnya — bukan
+   sekadar dipause (yang bikin transisi transform tidak jalan). */
+#journey .journey-ship.is-arrived .ship__sail{
+  animation:none;transform:skewX(-5deg) scaleY(.52) scaleX(.8);
+  transition:transform 1.5s var(--ease);
+}
+#journey .journey-ship.is-arrived .ship__sail--jib{
+  animation:none;transform:scaleX(.42) skewY(3deg);
+  transition:transform 1.5s var(--ease);
+}
+.journey-ship.is-arrived .ship__flag{
+  animation:none;transform:scaleX(.5) skewY(1deg);
+  transition:transform 1.1s var(--ease);
+}
+
+/* Medali terakhir terus berpendar lembut — rumah sudah terlihat */
+.journey-item.is-arrived .journey-anchor-core{
+  animation:arrivalGlowPulse 2.6s ease-in-out infinite;
+}
+@keyframes arrivalGlowPulse{
+  0%,100%{box-shadow:0 0 0 7px rgba(199,162,78,.24);}
+  50%{box-shadow:0 0 0 14px rgba(199,162,78,.1);}
+}
+
+.journey-arrived-badge{
+  display:inline-flex;align-items:center;gap:.4rem;margin-top:1rem;padding:.4rem 1rem;
+  border-radius:999px;background:var(--forest);color:var(--gold-light);
+  font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;
+  opacity:0;transform:translateY(8px) scale(.92);
+  transition:opacity .9s var(--ease),transform .9s var(--ease);
+}
+.journey-arrived-badge svg{width:12px;height:12px;flex-shrink:0;}
+.journey-arrived-badge.is-shown{opacity:1;transform:translateY(0) scale(1);}
+
+/* Jangkar yang turun dari lambung kapal, berayun, lalu menetap */
+.arrival-anchor{
+  position:fixed;width:20px;height:30px;pointer-events:none;z-index:151;
+  transform-origin:50% 0%;opacity:0;color:var(--gold);
+  animation:arrivalAnchorDrop 1.4s var(--ease) forwards;
+}
+.arrival-anchor svg{width:100%;height:100%;overflow:visible;}
+.arrival-anchor .a-rope{stroke:var(--gold-light);stroke-width:1.3;fill:none;opacity:.75;}
+.arrival-anchor .a-body{stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;}
+@keyframes arrivalAnchorDrop{
+  0%{opacity:0;transform:translateY(-8px) rotate(-16deg) scale(.5);}
+  14%{opacity:1;}
+  52%{transform:translateY(40px) rotate(9deg) scale(1);}
+  70%{transform:translateY(35px) rotate(-6deg) scale(1);}
+  86%{transform:translateY(38px) rotate(3deg) scale(1);}
+  100%{opacity:.95;transform:translateY(37px) rotate(0deg) scale(1);}
+}
+
+/* Riak air tempat jangkar "menyentuh" permukaan */
+.arrival-ripple{
+  position:fixed;border:1.6px solid var(--gold-light);border-radius:50%;pointer-events:none;z-index:149;
+  opacity:0;animation:arrivalRippleExpand 1.7s ease-out forwards;
+}
+@keyframes arrivalRippleExpand{
+  0%{opacity:.6;transform:translate(-50%,-50%) scale(.3);}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(3.4);}
+}
+
+/* Pendar sinar keemasan — seperti cahaya pelabuhan menyambut */
+.arrival-ray-burst{
+  position:fixed;pointer-events:none;z-index:148;transform:translate(-50%,-50%);opacity:0;
+  animation:arrivalRayFade 2s ease-out forwards;
+}
+.arrival-ray-burst svg{width:100%;height:100%;overflow:visible;}
+.arrival-ray-burst line{stroke:var(--gold-light);stroke-linecap:round;}
+@keyframes arrivalRayFade{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.4) rotate(0deg);}
+  35%{opacity:.85;}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(1.6) rotate(26deg);}
+}
+
+/* Kelopak & hati kecil yang mekar sekali saat berlabuh */
+.arrival-bloom{
+  position:fixed;pointer-events:none;z-index:150;border-radius:60% 0 60% 0;
+  animation:arrivalBloomMove 1.5s ease-out forwards;
+}
+@keyframes arrivalBloomMove{
+  0%{transform:translate(0,0) rotate(0deg) scale(1);opacity:1;}
+  100%{transform:translate(var(--tx),var(--ty)) rotate(var(--rot)) scale(.3);opacity:0;}
+}
+
+@media (max-width:720px){
+  .journey-arrived-badge{font-size:.6rem;padding:.34rem .85rem;}
+}
+
+@media (prefers-reduced-motion: reduce){
+  .journey-ship.is-arrived .ship__sail,
+  .journey-ship.is-arrived .ship__sail--jib,
+  .journey-ship.is-arrived .ship__flag{transition:none;}
 }
 
 @media (max-width:720px){
@@ -1337,6 +1449,10 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
               <span class="journey-date">19 Desember 2026</span>
               <h3>Menuju Pelaminan</h3>
               <p>Dan kini, kapal kami telah menemukan pelabuhannya. Dengan penuh syukur, kami mengundang Anda untuk berlayar bersama menuju babak baru ini.</p>
+              <span class="journey-arrived-badge" id="journeyArrivedBadge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="6" r="2.2"/><path d="M12 8.2V19M6.4 13.5a5.6 5.6 0 0 0 11.2 0M4.6 13.5h1.8M17.6 13.5h1.8"/></svg>
+                Telah Berlabuh
+              </span>
             </div>
           </li>
         </ol>
@@ -1518,16 +1634,24 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
   const hEl = document.getElementById('cd-hours');
   const mEl = document.getElementById('cd-min');
   const sEl = document.getElementById('cd-sec');
+  function tickBox(el, nextText){
+    if (!el || el.textContent === nextText) { if (el) el.textContent = nextText; return; }
+    el.textContent = nextText;
+    const box = el.closest('.countdown__box');
+    if (!box) return;
+    box.classList.add('is-ticking');
+    setTimeout(() => box.classList.remove('is-ticking'), 320);
+  }
   function updateCountdown(){
     const diff = Math.max(0, weddingDate - Date.now());
     const days = Math.floor(diff/86400000);
     const hours = Math.floor(diff/3600000)%24;
     const mins = Math.floor(diff/60000)%60;
     const secs = Math.floor(diff/1000)%60;
-    if (dEl) dEl.textContent = String(days).padStart(2,'0');
-    if (hEl) hEl.textContent = String(hours).padStart(2,'0');
-    if (mEl) mEl.textContent = String(mins).padStart(2,'0');
-    if (sEl) sEl.textContent = String(secs).padStart(2,'0');
+    tickBox(dEl, String(days).padStart(2,'0'));
+    tickBox(hEl, String(hours).padStart(2,'0'));
+    tickBox(mEl, String(mins).padStart(2,'0'));
+    tickBox(sEl, String(secs).padStart(2,'0'));
   }
   updateCountdown();
   setInterval(updateCountdown, 1000);
@@ -1723,12 +1847,16 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
     const items = document.querySelectorAll('.journey-item');
     if (!track || !ship || !seaSvg || !seaLine || !items.length) return;
 
-    const WAVE_CYCLES = 1.7;
-    let AMPLITUDE = isMobile ? 10 : 30;
+    const WAVE_CYCLES = 1.05;
+    let AMPLITUDE = isMobile ? 7 : 20;
     if (reduceMotion) AMPLITUDE = 0;
 
     let trackWidth = 0, trackHeight = 0, centerX = 0, seaLineLength = 0;
     let itemProgress = [];
+    let restStartTime = null;
+    let hasCelebratedArrival = false;
+    let displayProgress = 0;
+    let hasInitDisplayProgress = false;
 
     /* Dua gelombang dipadukan supaya jalur terasa seperti coretan tangan di peta,
        bukan gelombang sinus yang terlalu rapi/mekanis. */
@@ -1791,6 +1919,92 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
       }
     }
 
+    /* Perayaan sekali-seumur-hidup saat kapal benar-benar berlabuh:
+       jangkar turun berayun ke air, riak menyebar dari titik jangkar,
+       pendar sinar keemasan singkat, lalu kelopak & hati kecil mekar
+       ke segala arah — semua diposisikan relatif ke posisi kapal yang
+       sebenarnya di layar saat itu. */
+    function spawnArrivalCelebration(x, y){
+      if (reduceMotion) return;
+
+      const anchor = document.createElement('div');
+      anchor.className = 'arrival-anchor';
+      anchor.style.left = (x-10)+'px';
+      anchor.style.top = y+'px';
+      anchor.innerHTML = '<svg viewBox="0 0 20 30"><path class="a-rope" d="M10,0 L10,9"/><g class="a-body"><circle cx="10" cy="12" r="2.8"/><path d="M10,15 V25"/><path d="M3.5,20.5 a6.5,6.5 0 0 0 13,0"/><path d="M1.5,18.5 h3.6 M14.9,18.5 h3.6"/></g></svg>';
+      document.body.appendChild(anchor);
+      setTimeout(() => anchor.remove(), 1600);
+
+      [0, 260, 500].forEach((delay, i) => {
+        setTimeout(() => {
+          const ring = document.createElement('span');
+          ring.className = 'arrival-ripple';
+          const size = 18 + i*13;
+          ring.style.width = size+'px';
+          ring.style.height = (size*0.42)+'px';
+          ring.style.left = x+'px';
+          ring.style.top = (y+37)+'px';
+          document.body.appendChild(ring);
+          setTimeout(() => ring.remove(), 1800);
+        }, 700+delay);
+      });
+
+      const ray = document.createElement('div');
+      ray.className = 'arrival-ray-burst';
+      ray.style.left = x+'px';
+      ray.style.top = (y-16)+'px';
+      ray.style.width = '104px';
+      ray.style.height = '104px';
+      let rays = '';
+      const rayCount = 10;
+      for (let i=0;i<rayCount;i++){
+        const a = (360/rayCount)*i;
+        const len = i % 2 === 0 ? 46 : 34;
+        rays += '<line x1="52" y1="52" x2="52" y2="'+(52-len)+'" stroke-width="'+(i % 2 === 0 ? 2.2 : 1.4)+'" opacity="'+(i % 2 === 0 ? .8 : .45)+'" transform="rotate('+a+' 52 52)"/>';
+      }
+      ray.innerHTML = '<svg viewBox="0 0 104 104">'+rays+'</svg>';
+      document.body.appendChild(ray);
+      setTimeout(() => ray.remove(), 2100);
+
+      const colors = ['var(--gold)','var(--clay)','var(--sage)','var(--gold-light)'];
+      const heartSvg = '<svg viewBox="0 0 24 24" style="width:100%;height:100%;fill:var(--gold-light)"><path d="M12 21C12 21 3 14.6 3 8.7 3 5.6 5.4 3.3 8.3 3.3 10 3.3 11.3 4.1 12 5.3 12.7 4.1 14 3.3 15.7 3.3 18.6 3.3 21 5.6 21 8.7 21 14.6 12 21 12 21Z"/></svg>';
+      for (let i=0;i<16;i++){
+        const p = document.createElement('span');
+        p.className = 'arrival-bloom';
+        const angle = Math.random()*Math.PI*2;
+        const dist = 48+Math.random()*92;
+        p.style.setProperty('--tx', (Math.cos(angle)*dist).toFixed(1)+'px');
+        p.style.setProperty('--ty', (Math.sin(angle)*dist - 42).toFixed(1)+'px');
+        p.style.setProperty('--rot', (Math.random()*360)+'deg');
+        p.style.left = x+'px';
+        p.style.top = y+'px';
+        p.style.animationDelay = (Math.random()*0.3)+'s';
+        if (i % 6 === 0){
+          p.style.width = p.style.height = '11px';
+          p.innerHTML = heartSvg;
+        } else {
+          p.style.width = '8px'; p.style.height = '8px';
+          p.style.background = colors[i % colors.length];
+        }
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 1900);
+      }
+    }
+
+    function triggerArrival(){
+      if (hasCelebratedArrival) return;
+      hasCelebratedArrival = true;
+
+      const r = ship.getBoundingClientRect();
+      spawnArrivalCelebration(r.left + r.width*0.48, r.top + r.height*0.74);
+
+      const badge = document.getElementById('journeyArrivedBadge');
+      if (badge) requestAnimationFrame(() => badge.classList.add('is-shown'));
+
+      const lastItem = items[items.length-1];
+      if (lastItem) lastItem.classList.add('is-arrived');
+    }
+
     function updateShip(){
       const trackRect = track.getBoundingClientRect();
       const vh = window.innerHeight;
@@ -1806,7 +2020,24 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
          seberapa pun (tidak "meledak" di layar pendek). */
       const refLine = vh * 0.45;
       const scrollable = Math.max(trackRect.height, 1);
-      const progress = Math.min(1, Math.max(0, (refLine - trackRect.top) / scrollable));
+      const targetProgress = Math.min(1, Math.max(0, (refLine - trackRect.top) / scrollable));
+
+      /* Kapal tidak langsung "melompat" ke posisi hasil scroll — ia mengejar
+         target itu secara halus tiap frame (semacam kereta yang menyusul
+         perlahan, bukan teleportasi). Inilah yang benar-benar mengendalikan
+         kecepatannya: sekalipun orang men-scroll cepat/flick jauh sekaligus,
+         kapal tetap mengejar dengan laju yang tenang & konsisten, bukan
+         ikut melompat sejauh itu seketika. Saat pertama kali dihitung,
+         langsung disamakan dulu (tanpa animasi kejar) supaya tidak ada
+         "lompatan awal" yang aneh dari titik 0. */
+      if (!hasInitDisplayProgress){
+        displayProgress = targetProgress;
+        hasInitDisplayProgress = true;
+      }
+      const chase = reduceMotion ? 1 : 0.065;
+      displayProgress += (targetProgress - displayProgress) * chase;
+      if (Math.abs(targetProgress - displayProgress) < 0.0006) displayProgress = targetProgress;
+      const progress = displayProgress;
 
       const y = progress*trackHeight;
       const x = waveX(progress);
@@ -1815,7 +2046,24 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
       const xAhead = waveX(Math.min(1, progress+dStep));
       const angle = Math.atan2(xAhead-x, dStep*trackHeight) * (180/Math.PI) * 0.5;
 
-      ship.style.transform = 'translate('+x.toFixed(1)+'px,'+y.toFixed(1)+'px) rotate('+angle.toFixed(1)+'deg)';
+      /* Begitu kapal sampai ujung jalur, ia tidak cuma diam kaku — ia
+         "mengapung" pelan di tempat, seperti benar-benar berlabuh dan
+         beristirahat, bukan berhenti mendadak karena kehabisan data. */
+      const atRest = progress >= 0.999 && targetProgress >= 0.999;
+      if (atRest){
+        if (restStartTime === null) restStartTime = performance.now();
+      } else {
+        restStartTime = null;
+      }
+      const bobT = restStartTime !== null ? (performance.now() - restStartTime)/1000 : 0;
+      const bobAmplitude = reduceMotion ? 0 : 1;
+      const bobY = atRest ? Math.sin(bobT*1.6)*3*bobAmplitude : 0;
+      const bobRot = atRest ? Math.sin(bobT*1.2+0.6)*1.3*bobAmplitude : 0;
+
+      ship.classList.toggle('is-arrived', atRest);
+      if (atRest) triggerArrival();
+
+      ship.style.transform = 'translate('+x.toFixed(1)+'px,'+(y+bobY).toFixed(1)+'px) rotate('+(angle+bobRot).toFixed(1)+'deg)';
 
       /* Garis emas "tergambar" mengikuti sejauh mana kapal sudah berlayar */
       if (seaLineLength){
