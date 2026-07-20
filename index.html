@@ -1619,7 +1619,7 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
 
   /* Judul tab browser ikut personal saat dibuka lewat link bernama */
   if (guestName !== 'Tamu Undangan') {
-    document.title = 'Pernikahan Zultoni + Beska';
+    document.title = 'Undangan untuk ' + guestName + ' — Zultoni & Beska';
   }
 
   /* Prefill nama di form ucapan/RSVP supaya tamu tak perlu ketik ulang namanya */
@@ -2119,6 +2119,31 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
 
     window.addEventListener('resize', () => { layout(); });
     window.addEventListener('load', () => { layout(); });
+
+    /* Font kustom (Cormorant Garamond, Yellowtail, dst) dimuat dengan
+       font-display:swap — teksnya sempat tampil pakai font fallback dulu,
+       baru "melompat" ganti ke font asli begitu selesai dimuat. Lompatan ini
+       bisa mengubah tinggi kartu cerita (di desktop kolom teksnya lebih
+       sempit per kartu, jadi lebih gampang kebawa reflow dibanding di
+       mobile) — sehingga centerX/trackHeight/posisi tiap tonggak yang sudah
+       kadung dihitung di layout() awal jadi basi, dan kapal terlihat salah
+       posisi terhadap medali jangkarnya (terutama di desktop). Maka layout()
+       dihitung ulang begitu font benar-benar selesai settle, dan juga tiap
+       kali track sendiri berubah ukuran lewat ResizeObserver — jaring
+       pengaman untuk reflow apa pun di luar resize jendela biasa. */
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => layout()).catch(() => {});
+    }
+    if ('ResizeObserver' in window) {
+      let roTicking = false;
+      const ro = new ResizeObserver(() => {
+        if (roTicking) return;
+        roTicking = true;
+        requestAnimationFrame(() => { layout(); roTicking = false; });
+      });
+      ro.observe(track);
+    }
+
     layout();
     journeyLoop();
   })();
