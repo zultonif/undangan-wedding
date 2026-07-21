@@ -2,7 +2,8 @@
   "name": "undangan-zultoni-beska",
   "version": "1.0.0",
   "private": true,
+  "description": "Undangan pernikahan digital Zultoni & Beska — termasuk API RSVP ke Google Sheets",
   "dependencies": {
-    "googleapis": "latest"
+    "googleapis": "^140.0.1"
   }
 }
