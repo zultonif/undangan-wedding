@@ -1,28 +1,30 @@
-/**
- * Vercel Serverless Function — RSVP ke Google Sheets (tanpa Apps Script).
- *
- * File ini berjalan di server Vercel, TIDAK dikirim ke browser tamu.
- * Kredensial Google disimpan sebagai Environment Variable di dashboard Vercel,
- * jadi tidak pernah terlihat lewat "view source" atau devtools.
- *
- * Env var yang dibutuhkan (diisi di Vercel > Project Settings > Environment Variables):
- *   GOOGLE_CLIENT_EMAIL  -> dari file JSON service account (field "client_email")
- *   GOOGLE_PRIVATE_KEY   -> dari file JSON service account (field "private_key")
- *   GOOGLE_SHEET_ID      -> ID sheet, ambil dari URL:
- *                           https://docs.google.com/spreadsheets/d/ID_INI/edit
- *
- * Sheet harus punya tab bernama "RSVP" dengan header baris pertama:
- *   Timestamp | Nama | Status | Pesan
- * dan sheet itu harus di-Share (akses Editor) ke alamat GOOGLE_CLIENT_EMAIL.
- */
+// api/rsvp.js
+// Vercel Serverless Function — baca & tulis data RSVP ke Google Spreadsheet
+// lewat Google Service Account. Kontrak API-nya (GET -> array, POST -> {name,status,message})
+// sudah sesuai dengan yang dipanggil dari invite.html, jadi tidak perlu ubah apa pun di frontend.
+//
+// ENV VARS yang wajib diisi di Vercel (Project Settings -> Environment Variables):
+//   GOOGLE_SERVICE_ACCOUNT_EMAIL  -> email service account (...@....iam.gserviceaccount.com)
+//   GOOGLE_PRIVATE_KEY            -> private key dari file JSON service account
+//                                    (paste apa adanya, termasuk baris
+//                                    "-----BEGIN PRIVATE KEY-----" ... "-----END PRIVATE KEY-----")
+//   GOOGLE_SHEET_ID               -> ID spreadsheet (bagian di URL sheet antara /d/ dan /edit)
+//   GOOGLE_SHEET_NAME             -> (opsional) nama tab, default "RSVP"
+//
+// Sheet-nya wajib di-share ke email service account di atas sebagai Editor.
+// Baris pertama (header, baris 1) harus persis empat kolom ini:
+//   Timestamp | Nama | Status | Ucapan
 
 const { google } = require('googleapis');
 
-const SHEET_RANGE = 'RSVP!A:D';
+const SHEET_NAME = process.env.GOOGLE_SHEET_NAME || 'RSVP';
+const RANGE_READ = `${SHEET_NAME}!A2:D`;
+const RANGE_APPEND = `${SHEET_NAME}!A:D`;
+const VALID_STATUS = ['hadir', 'tidak', 'ragu'];
 
 function getSheetsClient() {
   const auth = new google.auth.JWT(
-    process.env.GOOGLE_CLIENT_EMAIL,
+    process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
     null,
     (process.env.GOOGLE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
     ['https://www.googleapis.com/auth/spreadsheets']
@@ -30,53 +32,63 @@ function getSheetsClient() {
   return google.sheets({ version: 'v4', auth });
 }
 
-module.exports = async (req, res) => {
-  try {
-    const sheets = getSheetsClient();
-    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
+module.exports = async function handler(req, res) {
+  const sheetId = process.env.GOOGLE_SHEET_ID;
+  if (!sheetId || !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !process.env.GOOGLE_PRIVATE_KEY) {
+    return res.status(500).json({ error: 'Konfigurasi Google Sheets belum lengkap di environment variables.' });
+  }
 
+  let sheets;
+  try {
+    sheets = getSheetsClient();
+  } catch (err) {
+    console.error('RSVP API auth error:', err);
+    return res.status(500).json({ error: 'Gagal autentikasi ke Google Sheets.' });
+  }
+
+  try {
     if (req.method === 'GET') {
       const result = await sheets.spreadsheets.values.get({
-        spreadsheetId,
-        range: SHEET_RANGE
+        spreadsheetId: sheetId,
+        range: RANGE_READ,
       });
-      const rows = (result.data.values || []).slice(1); // buang baris header
-      const data = rows
-        .filter(r => r[1])
-        .map(r => ({
-          name: String(r[1] || ''),
-          status: String(r[2] || 'ragu'),
-          message: String(r[3] || '')
+      const rows = result.data.values || [];
+      const wishes = rows
+        .filter((r) => (r[1] && r[1].trim()) || (r[3] && r[3].trim()))
+        .map((r) => ({
+          name: r[1] || '',
+          status: VALID_STATUS.includes(r[2]) ? r[2] : 'ragu',
+          message: r[3] || '',
         }));
-      return res.status(200).json(data);
+      return res.status(200).json(wishes);
     }
 
     if (req.method === 'POST') {
-      let body = req.body;
-      if (typeof body === 'string') {
-        try { body = JSON.parse(body); } catch (e) { body = {}; }
-      }
-      const name = (body && body.name || '').toString().trim();
-      const status = (body && body.status || 'ragu').toString().trim();
-      const message = (body && body.message || '').toString().trim();
+      const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+      const name = (body.name || '').toString().trim().slice(0, 120);
+      const status = VALID_STATUS.includes(body.status) ? body.status : 'ragu';
+      const message = (body.message || '').toString().trim().slice(0, 1000);
 
       if (!name || !message) {
-        return res.status(400).json({ error: 'Nama dan pesan wajib diisi.' });
+        return res.status(400).json({ error: 'Nama dan ucapan wajib diisi.' });
       }
 
+      const timestamp = new Date().toISOString();
       await sheets.spreadsheets.values.append({
-        spreadsheetId,
-        range: SHEET_RANGE,
+        spreadsheetId: sheetId,
+        range: RANGE_APPEND,
         valueInputOption: 'USER_ENTERED',
-        requestBody: { values: [[new Date().toISOString(), name, status, message]] }
+        insertDataOption: 'INSERT_ROWS',
+        requestBody: { values: [[timestamp, name, status, message]] },
       });
-      return res.status(200).json({ result: 'success' });
+
+      return res.status(200).json({ ok: true });
     }
 
-    res.setHeader('Allow', 'GET, POST');
-    return res.status(405).json({ error: 'Method not allowed' });
+    res.setHeader('Allow', ['GET', 'POST']);
+    return res.status(405).json({ error: `Method ${req.method} tidak didukung.` });
   } catch (err) {
     console.error('RSVP API error:', err);
-    return res.status(500).json({ error: 'Terjadi kesalahan di server.' });
+    return res.status(500).json({ error: 'Gagal memproses data RSVP.' });
   }
 };
