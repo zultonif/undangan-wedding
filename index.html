@@ -393,6 +393,25 @@ body.invite-open .day-quote{opacity:1;transform:translateY(0);transition-delay:1
    berlentera dengan pantulan air, jejak riak & kelip keemasan, serta kelopak
    yang mengambang di buritan, supaya terasa benar-benar berlayar di malam
    yang hangat, bukan sekadar siluet bergeser. */
+/* Ombak kapal sekarang animasi TERPISAH di pembungkus .ship__bob (di dalam
+   .ship), bukan dicampur ke transform kapal induk. Alasannya: kalau
+   translateY ombak ikut memakai banyak titik keyframe yang sama-sama
+   diberi easing var(--ease) (kurva yang cenderung "berhenti-jalan" di
+   tiap segmen), hasilnya jadi terasa patah-patah/nyaris tak kelihatan,
+   bukan mengalun mulus. Dengan .ship__bob berdiri sendiri — 1 siklus
+   penuh, easing ease-in-out standar, hanya 2 segmen (0%→50%→100%) —
+   kurva itu justru MEMBENTUK gelombang naik-turun yang mulus, dan
+   amplitudonya jauh lebih besar supaya benar-benar terlihat kentara. */
+.ship__bob{
+  display:block;
+  animation:shipBob 2.2s ease-in-out infinite paused;
+}
+#cover.show-bridge .ship__bob{animation-play-state:running;}
+@keyframes shipBob{
+  0%,100%{transform:translateY(0) rotate(-2.2deg);}
+  50%{transform:translateY(-22px) rotate(3deg);}
+}
+
 .ship{
   position:absolute;bottom:18%;left:-18%;width:clamp(120px,28vw,210px);z-index:2;
   animation:shipSail 7s var(--ease) forwards paused;
@@ -421,16 +440,14 @@ body.invite-open .day-quote{opacity:1;transform:translateY(0);transition-delay:1
   0%,100%{transform:skewX(0deg) scaleX(1);}
   50%{transform:skewX(-2.2deg) scaleX(1.015);}
 }
+/* Kapal induk sekarang cuma mengurus perjalanan lintas layar: posisi
+   kiri-kanan & membesar-mengecil (efek mendekat lalu menjauh) plus
+   sedikit kemiringan dasar — naik-turun ombaknya murni tugas .ship__bob
+   di atas, supaya dua gerakan ini tidak saling menumpuk/mengacaukan. */
 @keyframes shipSail{
-  0%{left:-18%;transform:translateY(0) rotate(-1.6deg) scale(.8);}
-  10%{transform:translateY(-6px) rotate(.4deg) scale(.92);}
-  18%{transform:translateY(-9px) rotate(1.2deg) scale(1);}
-  36%{transform:translateY(-2px) rotate(-1deg) scale(1.05);}
-  50%{transform:translateY(-11px) rotate(1.4deg) scale(1.08);}
-  54%{transform:translateY(-10px) rotate(1.3deg) scale(1.07);}
-  72%{transform:translateY(-3px) rotate(-1.1deg) scale(1.02);}
-  88%{transform:translateY(-8px) rotate(1deg) scale(.92);}
-  100%{left:106%;transform:translateY(0) rotate(-1.6deg) scale(.8);}
+  0%{left:-18%;transform:rotate(-1.6deg) scale(.8);}
+  50%{transform:rotate(.6deg) scale(1.08);}
+  100%{left:106%;transform:rotate(-1.6deg) scale(.8);}
 }
 
 /* Pantulan kapal di air — pudar & sedikit "beriak" agar terasa mengapung sungguhan */
@@ -1242,6 +1259,7 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
         </span>
       </div>
 
+      <div class="ship__bob">
       <svg viewBox="0 0 240 170" class="ship__art">
         <defs>
           <linearGradient id="shipHullGrad" x1="0" y1="0" x2="0" y2="1">
@@ -1293,6 +1311,7 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
           <rect class="ship__moonlight-sweep" x="-160" y="-60" width="560" height="290" fill="url(#moonSweepGrad)"/>
         </g>
       </svg>
+      </div>
     </div>
 
     <div class="bridge-text">
