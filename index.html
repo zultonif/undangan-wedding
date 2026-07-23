@@ -1935,7 +1935,7 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
     let AMPLITUDE = isMobile ? 7 : 20;
     if (reduceMotion) AMPLITUDE = 0;
 
-    let trackWidth = 0, trackHeight = 0, centerX = 0, seaLineLength = 0;
+    let trackWidth = 0, trackHeight = 0, centerX = 0, seaLineLength = 0, trackOffsetTop = 0;
     let itemProgress = [];
     let restStartTime = null;
     let hasCelebratedArrival = false;
@@ -1954,6 +1954,14 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
       const trackRect = track.getBoundingClientRect();
       trackWidth = track.clientWidth;
       trackHeight = track.offsetHeight;
+      /* Posisi absolut track dari puncak dokumen, dihitung SEKALI di sini
+         (bukan tiap frame) — dipakai nanti di updateShip() supaya loop
+         animasi tidak perlu memanggil getBoundingClientRect() 60x/detik
+         (yang memaksa browser menghitung ulang layout tiap kali dipanggil,
+         salah satu penyebab utama animasi terasa patah-patah/berat).
+         Cukup window.scrollY (baca murah, tanpa memaksa reflow) dikurangkan
+         dari angka ini untuk tahu posisi track relatif ke layar saat ini. */
+      trackOffsetTop = trackRect.top + window.scrollY;
 
       const firstAnchor = track.querySelector('.journey-anchor');
       if (firstAnchor){
@@ -2097,8 +2105,16 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
     }
 
     function updateShip(){
-      const trackRect = track.getBoundingClientRect();
       const vh = window.innerHeight;
+      const nowMs = performance.now();
+      /* trackTop dihitung dari cache (trackOffsetTop, sekali per layout())
+         dikurangi window.scrollY (baca murah, tidak memaksa reflow) — bukan
+         dari track.getBoundingClientRect() tiap frame. getBoundingClientRect()
+         memaksa browser menghitung ulang seluruh layout halaman setiap kali
+         dipanggil; memanggilnya 60x/detik di dalam loop animasi adalah
+         penyebab utama gerakan terasa patah-patah & berat. Hasil angkanya
+         sama persis, cuma jauh lebih murah dihitung. */
+      const trackTop = trackOffsetTop - window.scrollY;
 
       /* Kapal "diparkir" secara visual di sekitar tengah layar (bukan di
          atas) selagi cerita men-scroll melewatinya — garis acuan (refLine)
@@ -2110,8 +2126,8 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
          angka positif yang wajar, jadi kecepatannya konstan di layar
          seberapa pun (tidak "meledak" di layar pendek). */
       const refLine = vh * 0.45;
-      const scrollable = Math.max(trackRect.height, 1);
-      const targetProgress = Math.min(1, Math.max(0, (refLine - trackRect.top) / scrollable));
+      const scrollable = Math.max(trackHeight, 1);
+      const targetProgress = Math.min(1, Math.max(0, (refLine - trackTop) / scrollable));
 
       /* Perayaan (kembang api + lencana) dipicu dari posisi scroll ASLI
          (targetProgress), BUKAN dari nilai yang sudah dihaluskan di bawah.
@@ -2154,13 +2170,12 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
       /* Ombak yang terus berjalan selagi kapal berlayar — supaya kapal
          terlihat benar-benar dipermainkan ombak (naik-turun pelan), sama
          seperti kapal di scene malam (bridge). Pakai waktu absolut
-         (performance.now()) yang terus berjalan, TERLEPAS dari posisi
-         scroll, jadi ombaknya tetap terasa hidup baik saat scroll cepat,
-         lambat, maupun berhenti sejenak di tengah jalan. */
-      const sailBobT = performance.now()/1000;
+         (nowMs, dibaca sekali di atas) yang terus berjalan, TERLEPAS dari
+         posisi scroll, jadi ombaknya tetap terasa hidup baik saat scroll
+         cepat, lambat, maupun berhenti sejenak di tengah jalan. */
       const sailBobAmplitude = reduceMotion ? 0 : 1;
-      const sailBobY = Math.sin(sailBobT*2.1)*1.8*sailBobAmplitude;
-      const sailBobRot = Math.sin(sailBobT*1.7+0.6)*1*sailBobAmplitude;
+      const sailBobY = Math.sin(nowMs/1000*2.1)*1.8*sailBobAmplitude;
+      const sailBobRot = Math.sin(nowMs/1000*1.7+0.6)*1*sailBobAmplitude;
 
       /* Begitu kapal sampai ujung jalur, ombaknya membesar sedikit — ia
          tidak cuma diam kaku, tapi "mengapung" lebih terasa di tempat,
@@ -2168,11 +2183,11 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
          mendadak karena kehabisan data. */
       const atRest = progress >= 0.999 && targetProgress >= 0.999;
       if (atRest){
-        if (restStartTime === null) restStartTime = performance.now();
+        if (restStartTime === null) restStartTime = nowMs;
       } else {
         restStartTime = null;
       }
-      const restBobT = restStartTime !== null ? (performance.now() - restStartTime)/1000 : 0;
+      const restBobT = restStartTime !== null ? (nowMs - restStartTime)/1000 : 0;
       const restBobAmplitude = reduceMotion ? 0 : 1;
       const restBobY = atRest ? Math.sin(restBobT*1.6)*3*restBobAmplitude : 0;
       const restBobRot = atRest ? Math.sin(restBobT*1.2+0.6)*1.3*restBobAmplitude : 0;
@@ -2208,11 +2223,25 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
        ulang di SETIAP frame yang di-render, jadi tidak bergantung pada
        seberapa rapat/renggang browser menembakkan event scroll (trackpad,
        scroll-wheel per-tik, atau momentum scrolling semuanya terasa sama
-       halusnya). */
+       halusnya). Dibungkus start/stop supaya bisa benar-benar dimatikan
+       (bukan cuma di-skip) saat section ini tidak sedang dilihat. */
     let journeyLoopId = null;
+    let journeyLoopActive = false;
     function journeyLoop(){
       updateShip();
       journeyLoopId = requestAnimationFrame(journeyLoop);
+    }
+    function startJourneyLoop(){
+      if (journeyLoopActive) return;
+      journeyLoopActive = true;
+      journeyLoop();
+    }
+    function stopJourneyLoop(){
+      journeyLoopActive = false;
+      if (journeyLoopId !== null){
+        cancelAnimationFrame(journeyLoopId);
+        journeyLoopId = null;
+      }
     }
 
     window.addEventListener('resize', () => { layout(); });
@@ -2243,7 +2272,26 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
     }
 
     layout();
-    journeyLoop();
+    /* Loop animasi cuma menyala selagi section ini ada di sekitar layar
+       (atau akan segera terlihat) — dijeda TOTAL begitu tamu sudah scroll
+       jauh meninggalkannya (misal sedang mengisi RSVP di bawah), supaya
+       browser tidak terus-menerus menghitung ulang posisi kapal untuk
+       sesuatu yang sedang tidak dilihat siapa pun. Ini yang paling besar
+       meringankan beban halaman secara keseluruhan. Marjin 60% tinggi
+       layar di atas & bawah supaya loop sudah menyala SEBELUM section
+       genap masuk layar (tidak ada kapal "muncul tiba-tiba" di tengah
+       animasi) dan baru berhenti sesaat SETELAH benar-benar terlewati. */
+    if ('IntersectionObserver' in window) {
+      const journeyVisibility = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) startJourneyLoop();
+          else stopJourneyLoop();
+        });
+      }, { rootMargin: '60% 0px 60% 0px' });
+      journeyVisibility.observe(track);
+    } else {
+      startJourneyLoop();
+    }
   })();
 
 
