@@ -2,7 +2,6 @@
 // Vercel Serverless Function — gerbang kode akses (PIN/passphrase) untuk halaman
 // "Kelola Tamu" (generator link undangan + kirim WA). Pengecekannya jalan di server,
 // BUKAN di JavaScript browser, jadi tidak bisa dilewati lewat "View Source" / DevTools.
-//
 // ENV VAR yang wajib diisi di Vercel (Project Settings -> Environment Variables):
 //   ADMIN_PIN  -> kode akses bebas, boleh angka atau gabungan kata
 //                 contoh: 482910   atau   zultoni-beska-2026
