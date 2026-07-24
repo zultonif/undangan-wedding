@@ -204,11 +204,6 @@ body.invite-locked{overflow:hidden;height:100vh;height:100dvh;}
 #cover{position:fixed;inset:0;z-index:100;overflow:hidden;transition:opacity .9s ease .45s;}
 #cover.is-hidden{opacity:0;pointer-events:none;visibility:hidden;}
 
-/* Lapisan krem yang menutup penuh panggung sebelum #cover memudar, supaya
-   proses fade tidak pernah memperlihatkan hijau tua/vignette gelap
-   ber-blend langsung dengan latar krem body (itu yang bikin belang zaitun).
-   Overlay ini menutup dulu dengan krem solid, baru #cover (beserta overlay
-   di dalamnya) memudar — hasilnya krem bertemu krem, mulus tanpa pinggiran gelap. */
 .cover-fadeout{
   position:absolute;inset:0;z-index:50;background:var(--cream);
   opacity:0;pointer-events:none;transition:opacity .5s ease;
@@ -339,12 +334,6 @@ body.invite-open .day-quote{opacity:1;transform:translateY(0);transition-delay:1
   100%{top:40%;transform:translate(-50%,-50%) scale(9);}
 }
 
-/* Whiteout penuh layar — pakai ukuran default radial-gradient (otomatis
-   menjangkau sudut terjauh kotak, berapa pun rasio lebar:tingginya), jadi
-   TIDAK ADA sudut yang tetap gelap seperti pada lingkaran bulan yang cuma
-   di-scale (yang di layar lebar/pendek gagal menjangkau pojok). Dipadukan
-   dengan vignette yang memudar bersamaan, transisi ke bagian Assalamualaikum
-   jadi benar-benar mulus tanpa belang gelap di pinggir. */
 .moon-whiteout{
   position:absolute;inset:0;z-index:7;pointer-events:none;
   background:radial-gradient(circle at 50% 42%, #FBF6EA 0%, var(--gold-light) 42%, rgba(234,217,166,.94) 100%);
@@ -389,19 +378,6 @@ body.invite-open .day-quote{opacity:1;transform:translateY(0);transition-delay:1
 .wave--front{bottom:-2%;animation:waveDrift 5.8s linear infinite;}
 @keyframes waveDrift{0%{transform:translateX(0);}100%{transform:translateX(-4%);}}
 
-/* Kapal menyelesaikan pelayarannya secara utuh dari kiri ke kanan — perahu
-   berlentera dengan pantulan air, jejak riak & kelip keemasan, serta kelopak
-   yang mengambang di buritan, supaya terasa benar-benar berlayar di malam
-   yang hangat, bukan sekadar siluet bergeser. */
-/* Ombak kapal sekarang animasi TERPISAH di pembungkus .ship__bob (di dalam
-   .ship), bukan dicampur ke transform kapal induk. Alasannya: kalau
-   translateY ombak ikut memakai banyak titik keyframe yang sama-sama
-   diberi easing var(--ease) (kurva yang cenderung "berhenti-jalan" di
-   tiap segmen), hasilnya jadi terasa patah-patah/nyaris tak kelihatan,
-   bukan mengalun mulus. Dengan .ship__bob berdiri sendiri — 1 siklus
-   penuh, easing ease-in-out standar, hanya 2 segmen (0%→50%→100%) —
-   kurva itu justru MEMBENTUK gelombang naik-turun yang mulus, dan
-   amplitudonya jauh lebih besar supaya benar-benar terlihat kentara. */
 .ship__bob{
   display:block;
   animation:shipBob 2.2s ease-in-out infinite paused;
@@ -440,10 +416,7 @@ body.invite-open .day-quote{opacity:1;transform:translateY(0);transition-delay:1
   0%,100%{transform:skewX(0deg) scaleX(1);}
   50%{transform:skewX(-2.2deg) scaleX(1.015);}
 }
-/* Kapal induk sekarang cuma mengurus perjalanan lintas layar: posisi
-   kiri-kanan & membesar-mengecil (efek mendekat lalu menjauh) plus
-   sedikit kemiringan dasar — naik-turun ombaknya murni tugas .ship__bob
-   di atas, supaya dua gerakan ini tidak saling menumpuk/mengacaukan. */
+
 @keyframes shipSail{
   0%{left:-18%;transform:rotate(-1.6deg) scale(.8);}
   50%{transform:rotate(.6deg) scale(1.08);}
@@ -550,8 +523,6 @@ body.invite-open .day-quote{opacity:1;transform:translateY(0);transition-delay:1
   50%{opacity:.85;transform:translateX(-50%) scaleX(1.1);}
 }
 
-/* Bintang jatuh — melintas tepat saat kapal berada paling dekat & besar,
-   seperti momen "membuat permintaan" di tengah pelayaran */
 .shooting-star{
   position:absolute;width:2.5px;height:2.5px;border-radius:50%;background:var(--cream);
   opacity:0;box-shadow:0 0 6px 2px rgba(250,243,229,.9);z-index:2;
@@ -573,8 +544,6 @@ body.invite-open .day-quote{opacity:1;transform:translateY(0);transition-delay:1
   100%{opacity:0;transform:rotate(var(--rot)) translateX(150px);}
 }
 
-/* Sekelip hati kecil yang mengambang sekali dari buritan — "harapan yang
-   terkirim", muncul bersamaan dengan bintang jatuh saat kapal paling dekat */
 .ship__wish-heart{
   position:absolute;left:13%;bottom:34%;width:11px;height:11px;color:var(--gold-light);
   opacity:0;filter:drop-shadow(0 0 5px rgba(234,217,166,.85));
@@ -589,8 +558,6 @@ body.invite-open .day-quote{opacity:1;transform:translateY(0);transition-delay:1
   100%{opacity:0;transform:translateY(-32px) scale(.5) rotate(10deg);}
 }
 
-/* Kilau bulan yang menyapu layar — di-clip persis mengikuti siluet badan & layar kapal,
-   bukan kotak persegi, supaya cahayanya benar-benar terasa "mengenai kain layar". */
 .ship__moonlight-sweep-clip{pointer-events:none;}
 .ship__moonlight-sweep{
   mix-blend-mode:screen;transform-box:fill-box;
@@ -618,9 +585,6 @@ body.invite-open .day-quote{opacity:1;transform:translateY(0);transition-delay:1
   100%{transform:translateX(140vw);}
 }
 
-/* Vignette lembut — menggelapkan sudut layar agar mata tetap tertuju ke kapal & bulan,
-   lalu memudar tepat saat momen whiteout (moon-whiteout) terjadi, supaya sudut
-   layar tidak tetap gelap saat seharusnya sudah terang menjelang undangan muncul. */
 .bridge-scene::after{
   content:'';position:absolute;inset:0;z-index:6;pointer-events:none;
   background:radial-gradient(ellipse at 50% 55%, transparent 45%, rgba(16,22,13,.55) 100%);
@@ -708,12 +672,6 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
 .journey-compass svg{width:100%;height:100%;}
 @keyframes journeyCompassSpin{to{transform:rotate(360deg);}}
 
-/* Latar peta usang di balik seluruh section — supaya "Perjalanan Kami" betul-betul
-   terasa seperti membaca peta pelayaran tua, bukan sekadar garis emas di atas krem
-   polos. Gradasinya sengaja "reda" kembali persis ke --cream di tepi paling atas &
-   paling bawah section, supaya menyatu mulus dengan section Mempelai (cream polos)
-   di atasnya dan seam krem section Menghitung Hari tepat di bawahnya — jadi warna
-   petanya hanya terasa di tengah, tanpa garis batas yang kentara. */
 #journey{
   background:
     radial-gradient(ellipse 60% 38% at 14% 10%, rgba(122,58,62,.07), transparent 58%),
@@ -834,16 +792,6 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
   100%{transform:translate(var(--tx),var(--ty)) rotate(200deg) scale(1);opacity:0;}
 }
 
-/* ===================================================================
-   TIBA DI TUJUAN — kapal berlabuh di tonggak terakhir
-   Layarnya turun/lipat (bukan cuma berhenti mendadak), medali terakhir
-   berpendar lembut selamanya, kartu terakhir dapat lencana "Telah
-   Berlabuh", dan sekali saja meletus perayaan: jangkar turun + riak air +
-   pendar emas + kelopak & hati kecil mengambang. =================== */
-
-/* Layar dilepas dari animasi flutter (animation:none) supaya transisi ke
-   bentuk "terlipat" benar-benar mulus dari posisi terakhirnya — bukan
-   sekadar dipause (yang bikin transisi transform tidak jalan). */
 #journey .journey-ship.is-arrived .ship__sail{
   animation:none;transform:skewX(-5deg) scaleY(.52) scaleX(.8);
   transition:transform 1.5s var(--ease);
@@ -1320,8 +1268,6 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
       <p class="bridge-line--2">Berlayar bersama, menuju cahaya senja yang abadi</p>
     </div>
 
-    <!-- Menutup panggung malam dengan krem solid sebelum #cover memudar,
-         supaya transisi ke bagian Assalamualaikum tidak belang gelap. -->
     <div class="cover-fadeout" aria-hidden="true"></div>
   </div>
 </section>
@@ -1386,10 +1332,6 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
     </div>
   </section>
 
-  <!-- JOURNEY (Perjalanan Kami) -->
-  <!-- GANTI tanggal & cerita di setiap .journey-card dengan kisah asli kalian.
-       Kapal berlayar menyusuri "peta" bergaya jalur harta karun mengikuti scroll,
-       jalur emasnya tergambar progresif, dan tiap tonggak cerita punya medali ikon sendiri. -->
   <section id="journey" class="section">
     <div class="journey-map-bg" aria-hidden="true">
       <span class="journey-map-grid"></span>
@@ -2107,44 +2049,14 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
     function updateShip(){
       const vh = window.innerHeight;
       const nowMs = performance.now();
-      /* trackTop dihitung dari cache (trackOffsetTop, sekali per layout())
-         dikurangi window.scrollY (baca murah, tidak memaksa reflow) — bukan
-         dari track.getBoundingClientRect() tiap frame. getBoundingClientRect()
-         memaksa browser menghitung ulang seluruh layout halaman setiap kali
-         dipanggil; memanggilnya 60x/detik di dalam loop animasi adalah
-         penyebab utama gerakan terasa patah-patah & berat. Hasil angkanya
-         sama persis, cuma jauh lebih murah dihitung. */
       const trackTop = trackOffsetTop - window.scrollY;
-
-      /* Kapal "diparkir" secara visual di sekitar tengah layar (bukan di
-         atas) selagi cerita men-scroll melewatinya — garis acuan (refLine)
-         di bawah ini menentukan persis di ketinggian berapa kapal terlihat
-         di layar. Progres HANYA mulai bertambah begitu bagian atas track
-         mencapai garis acuan itu (bukan sejak track baru muncul dari bawah
-         layar), jadi kapal tetap diam di titik awal sampai section itu
-         betul-betul mulai terlihat — dan pembagi (tinggi track) selalu
-         angka positif yang wajar, jadi kecepatannya konstan di layar
-         seberapa pun (tidak "meledak" di layar pendek). */
+      
       const refLine = vh * 0.45;
       const scrollable = Math.max(trackHeight, 1);
       const targetProgress = Math.min(1, Math.max(0, (refLine - trackTop) / scrollable));
 
-      /* Perayaan (kembang api + lencana) dipicu dari posisi scroll ASLI
-         (targetProgress), BUKAN dari nilai yang sudah dihaluskan di bawah.
-         Ini sengaja dipisah: kalau dipicu dari nilai halus yang masih
-         "mengejar", pada scroll cepat/flick jauh, pemicunya bisa telat
-         sampai 1-2 detik — cukup lama sampai orang sudah keburu scroll
-         jauh melewati section ini dan kembang apinya jadi tidak kelihatan.
-         Dengan dipicu dari posisi scroll asli, perayaannya selalu muncul
-         TEPAT saat scroll benar-benar mencapai titik akhir. */
       if (targetProgress >= 0.999) triggerArrival();
-
-      /* Kapal sendiri (tampilannya) tetap dihaluskan supaya tidak terasa
-         "loncat" tiap frame — tapi sekarang lajunya dibatasi maksimum per
-         frame (bukan cuma persentase dari sisa jarak), jadi lompatan scroll
-         yang besar tetap dikejar dalam waktu singkat & wajar (bukan
-         "mengambang" lama menyusul di belakang). Untuk pergeseran kecil
-         sehari-hari, efeknya tetap terasa halus seperti sebelumnya. */
+      
       if (!hasInitDisplayProgress){
         displayProgress = targetProgress;
         hasInitDisplayProgress = true;
@@ -2167,20 +2079,10 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
       const xAhead = waveX(Math.min(1, progress+dStep));
       const angle = Math.atan2(xAhead-x, dStep*trackHeight) * (180/Math.PI) * 0.5;
 
-      /* Ombak yang terus berjalan selagi kapal berlayar — supaya kapal
-         terlihat benar-benar dipermainkan ombak (naik-turun pelan), sama
-         seperti kapal di scene malam (bridge). Pakai waktu absolut
-         (nowMs, dibaca sekali di atas) yang terus berjalan, TERLEPAS dari
-         posisi scroll, jadi ombaknya tetap terasa hidup baik saat scroll
-         cepat, lambat, maupun berhenti sejenak di tengah jalan. */
       const sailBobAmplitude = reduceMotion ? 0 : 1;
       const sailBobY = Math.sin(nowMs/1000*2.1)*1.8*sailBobAmplitude;
       const sailBobRot = Math.sin(nowMs/1000*1.7+0.6)*1*sailBobAmplitude;
 
-      /* Begitu kapal sampai ujung jalur, ombaknya membesar sedikit — ia
-         tidak cuma diam kaku, tapi "mengapung" lebih terasa di tempat,
-         seperti benar-benar berlabuh dan beristirahat, bukan berhenti
-         mendadak karena kehabisan data. */
       const atRest = progress >= 0.999 && targetProgress >= 0.999;
       if (atRest){
         if (restStartTime === null) restStartTime = nowMs;
@@ -2218,13 +2120,6 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
       });
     }
 
-    /* Loop rAF berkelanjutan (bukan cuma saat event 'scroll' menembak) —
-       inilah kunci gerakan yang benar-benar mulus: posisi kapal dihitung
-       ulang di SETIAP frame yang di-render, jadi tidak bergantung pada
-       seberapa rapat/renggang browser menembakkan event scroll (trackpad,
-       scroll-wheel per-tik, atau momentum scrolling semuanya terasa sama
-       halusnya). Dibungkus start/stop supaya bisa benar-benar dimatikan
-       (bukan cuma di-skip) saat section ini tidak sedang dilihat. */
     let journeyLoopId = null;
     let journeyLoopActive = false;
     function journeyLoop(){
@@ -2247,17 +2142,6 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
     window.addEventListener('resize', () => { layout(); });
     window.addEventListener('load', () => { layout(); });
 
-    /* Font kustom (Cormorant Garamond, Yellowtail, dst) dimuat dengan
-       font-display:swap — teksnya sempat tampil pakai font fallback dulu,
-       baru "melompat" ganti ke font asli begitu selesai dimuat. Lompatan ini
-       bisa mengubah tinggi kartu cerita (di desktop kolom teksnya lebih
-       sempit per kartu, jadi lebih gampang kebawa reflow dibanding di
-       mobile) — sehingga centerX/trackHeight/posisi tiap tonggak yang sudah
-       kadung dihitung di layout() awal jadi basi, dan kapal terlihat salah
-       posisi terhadap medali jangkarnya (terutama di desktop). Maka layout()
-       dihitung ulang begitu font benar-benar selesai settle, dan juga tiap
-       kali track sendiri berubah ukuran lewat ResizeObserver — jaring
-       pengaman untuk reflow apa pun di luar resize jendela biasa. */
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(() => layout()).catch(() => {});
     }
@@ -2272,15 +2156,6 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
     }
 
     layout();
-    /* Loop animasi cuma menyala selagi section ini ada di sekitar layar
-       (atau akan segera terlihat) — dijeda TOTAL begitu tamu sudah scroll
-       jauh meninggalkannya (misal sedang mengisi RSVP di bawah), supaya
-       browser tidak terus-menerus menghitung ulang posisi kapal untuk
-       sesuatu yang sedang tidak dilihat siapa pun. Ini yang paling besar
-       meringankan beban halaman secara keseluruhan. Marjin 60% tinggi
-       layar di atas & bawah supaya loop sudah menyala SEBELUM section
-       genap masuk layar (tidak ada kapal "muncul tiba-tiba" di tengah
-       animasi) dan baru berhenti sesaat SETELAH benar-benar terlewati. */
     if ('IntersectionObserver' in window) {
       const journeyVisibility = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -2309,8 +2184,6 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
     });
   });
 
-  /* ---------- RSVP / Wishes wall (tersimpan di Google Spreadsheet lewat Vercel Serverless Function) ---------- */
-  /* Backend-nya ada di /api/rsvp.js — lihat file itu untuk setup env var Google Service Account di Vercel */
   const SHEET_API_URL = '/api/rsvp';
 
   const wishForm = document.getElementById('wishForm');
