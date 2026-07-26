@@ -767,8 +767,16 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
 .journey-ship{
   position:absolute;top:0;left:0;width:62px;z-index:3;pointer-events:none;
   transform:translate(-50%,0);will-change:transform;
-  filter:drop-shadow(0 6px 10px rgba(40,51,31,.25));
 }
+/* Ombak naik-turun kapal dipindah ke animasi CSS: ia jalan di compositor,
+   tidak menyentuh main thread sama sekali, dan yang terpenting membuat JS
+   tidak perlu lagi menulis transform di setiap frame selamanya. */
+.journey-ship__bob{display:block;animation:journeyShipBob 3.6s ease-in-out infinite;}
+@keyframes journeyShipBob{
+  0%,100%{transform:translateY(0) rotate(-1.1deg);}
+  50%    {transform:translateY(-3px) rotate(1.1deg);}
+}
+.journey-ship.is-arrived .journey-ship__bob{animation-duration:5.4s;}
 .journey-ship svg{width:100%;display:block;overflow:visible;}
 #journey .ship__sail{fill:var(--cream-dim);stroke:var(--forest-mid);stroke-width:1;}
 #journey .ship__sail--jib{fill:var(--white-soft);stroke:var(--forest-mid);stroke-width:1;}
@@ -1108,50 +1116,22 @@ body.content-visible #mainContent{opacity:1;transform:translateY(0);}
 
 <style id="fx-style">
 /* ===================================================================
-   LAPISAN KOREOGRAFI SCROLL  (fx-*)
-   -------------------------------------------------------------------
-   Blok ini TAMBAHAN di atas desain yang sudah ada — tidak ada satu pun
-   baris asli undangan yang diubah. Kalau suatu saat mau dikembalikan
-   seperti semula, cukup hapus blok style#fx-style dan blok
-   script#fx-script di bawahnya, selesai.
-
-   Satu prinsip dipegang di seluruh blok ini: SCROLL ADALAH PERJALANAN.
-   Semua gerakan memperkuat metafora yang memang sudah dipakai undangan
-   ini (gerbang taman → pelayaran → peta kisah), bukan menambah bahasa
-   visual baru. Tiap section dapat SATU gerakan khas, tidak lebih —
-   supaya terasa terkurasi, bukan ramai.
-
-   Urutan penulisan di bawah ini penting dan sengaja:
-     1) keadaan awal (tersembunyi)
-     2) penetral aturan .reveal.in-view yang lama
-     3) varian arah gerak
-     4) keadaan akhir (terlihat), specificity paling tinggi
+   LAPISAN KOREOGRAFI SCROLL (fx-*) — versi hemat
+   Blok ini + blok script#fx-script bisa dihapus utuh untuk kembali ke
+   undangan aslinya. Urutan penulisan di bawah penting: keadaan awal →
+   penetral aturan lama → varian arah → keadaan akhir (specificity tertinggi).
    =================================================================== */
-
 :root{
-  /* Kurva "berangkat cepat, mendarat pelan" — elemen jadi terasa punya
-     bobot, bukan bergerak dengan kecepatan rata seperti easing default. */
   --fx-ease:cubic-bezier(.16,.84,.28,1);
-  /* Sedikit melewati titik akhir lalu balik — hanya untuk benda bundar
-     (medali, logo, daun) supaya terasa mendarat, bukan berhenti. */
   --fx-spring:cubic-bezier(.34,1.46,.5,1);
   --fx-dur:1.05s;
   --fx-blur:9px;
 }
-body.fx-mobile{--fx-blur:5px;}   /* layar kecil: blur dikecilkan, jauh lebih murah dirender */
-body.fx-lite {--fx-blur:0px;}    /* perangkat lemah: blur dimatikan total, gerak tetap jalan */
+/* Di ponsel blur DIMATIKAN total (sebelumnya 5px). Blur adalah efek termahal
+   di halaman ini: tiap elemen ber-blur dipaksa dirender di lapisan sendiri. */
+body.fx-lite{--fx-blur:0px;}
 
-/* ===================================================================
-   1. MESIN REVEAL — pengganti "fade + naik 28px" yang lama
-   -------------------------------------------------------------------
-   Yang lama: elemen digeser naik lalu muncul. Yang baru: elemen datang
-   dari BELAKANG bidang gambar — sedikit mengecil, kabur, lalu mengunci
-   fokus. Rasanya seperti kamera yang menemukan subjeknya. Ini satu
-   perubahan yang paling terasa di sepanjang halaman.
-
-   Dipakai longhand transition-* (bukan shorthand `transition`) supaya
-   kelas .reveal-d1/d2/d3 yang sudah ada di markup tetap hidup delay-nya.
-   =================================================================== */
+/* ---------- 1. Mesin reveal ---------- */
 .reveal{
   opacity:0;
   transform:translate3d(0,34px,0) scale(.985);
@@ -1160,103 +1140,53 @@ body.fx-lite {--fx-blur:0px;}    /* perangkat lemah: blur dimatikan total, gerak
   transition-duration:var(--fx-dur),var(--fx-dur),.75s;
   transition-timing-function:var(--fx-ease);
 }
-
-/* Penetral aturan lama .reveal.in-view.
-   Alasannya: selagi cover masih menutup layar, isi undangan sebenarnya
-   sudah "terlihat" oleh IntersectionObserver di baliknya — jadi tanpa
-   penjaga ini seluruh animasi bagian pertama sudah habis dimainkan
-   sebelum tamu sempat melihat apa pun. Di sini semuanya ditahan di
-   posisi awal, lalu dilepas serentak begitu undangan resmi dibuka
-   (body.fx-armed) — sekaligus jadi momen pembuka yang terorkestrasi. */
+/* Selagi cover masih menutup layar, isi halaman sudah "terlihat" oleh
+   IntersectionObserver di baliknya — tanpa penahan ini seluruh animasi
+   bagian pertama habis dimainkan sebelum tamu sempat melihatnya. */
 .reveal.in-view{
   opacity:0;
   transform:translate3d(0,34px,0) scale(.985);
   filter:blur(var(--fx-blur));
 }
-
-/* --- Varian arah gerak (dipasang oleh JS ke elemen tertentu) --- */
 .reveal.fx-left {transform:translate3d(-58px,20px,0) rotate(-2deg) scale(.97);}
 .reveal.fx-right{transform:translate3d( 58px,20px,0) rotate( 2deg) scale(.97);}
-/* Kartu "direbahkan ke atas meja" — butuh perspective di kontainernya. */
 .fx-stage{perspective:1200px;perspective-origin:50% 0%;}
 .reveal.fx-lay{transform:translate3d(0,56px,0) rotateX(15deg) scale(.965);transform-origin:50% 100%;}
+.reveal.countdown,.reveal.rsvp-form,.reveal.divider,
+.reveal.fx-split,.reveal.fx-read{opacity:1;transform:none;filter:none;}
 
-/* --- Wadah yang isinya bergerak sendiri: wadahnya sendiri dinetralkan --- */
-.reveal.countdown,
-.reveal.rsvp-form,
-.reveal.divider,
-.reveal.fx-split,
-.reveal.fx-read{opacity:1;transform:none;filter:none;}
-
-/* --- KEADAAN AKHIR: terlihat --- */
 body.fx-armed .reveal.in-view{opacity:1;transform:none;filter:blur(0);}
 body.fx-armed .reveal.countdown.in-view,
 body.fx-armed .reveal.rsvp-form.in-view,
 body.fx-armed .reveal.divider.in-view,
 body.fx-armed .reveal.fx-split.in-view,
 body.fx-armed .reveal.fx-read.in-view{filter:none;}
-/* Begitu transisinya benar-benar selesai, filter dilepas sepenuhnya.
-   blur(0) pun masih memaksa browser menyiapkan lapisan render sendiri
-   untuk elemen itu selamanya — dilepas berarti halaman kembali ringan. */
+/* blur(0) pun tetap memaksa lapisan render tersendiri selamanya — dilepas. */
 body.fx-armed .reveal.in-view.fx-settled{filter:none;}
-
-/* Jeda bertingkat dilebarkan sedikit dari aslinya supaya urutan
-   datangnya terbaca jelas sebagai "satu per satu". */
 .reveal-d1{transition-delay:.1s;}
 .reveal-d2{transition-delay:.2s;}
 .reveal-d3{transition-delay:.3s;}
 
-/* ===================================================================
-   2. JUDUL SECTION — kata demi kata naik dari balik lipatan
-   -------------------------------------------------------------------
-   Tiap kata dibungkus jendela kecil ber-overflow:hidden, isinya naik
-   dari bawah sambil meluruskan kemiringannya. Ini "tanda tangan" gerak
-   halaman: mata ikut membaca judul dari kiri ke kanan mengikuti urutan
-   kata yang mendarat.
-   =================================================================== */
+/* ---------- 2. Judul: kata demi kata naik dari balik lipatan ---------- */
 .section-title{line-height:1.24;}
-.fx-w{
-  display:inline-block;vertical-align:top;overflow:hidden;
-  /* Bantalan bawah supaya ekor huruf (g, y, p) tidak terpotong jendela. */
-  padding-bottom:.16em;margin-bottom:-.16em;
-}
-.fx-wi{
-  display:inline-block;
-  transform:translateY(115%) rotate(5deg);
-  opacity:0;
+.fx-w{display:inline-block;vertical-align:top;overflow:hidden;
+  padding-bottom:.16em;margin-bottom:-.16em;}
+.fx-wi{display:inline-block;transform:translateY(115%) rotate(5deg);opacity:0;
   transition:transform .95s var(--fx-ease),opacity .55s ease;
-  transition-delay:var(--fx-wd,0s);
-}
+  transition-delay:var(--fx-wd,0s);}
 body.fx-armed .in-view .fx-wi{transform:none;opacity:1;}
 
-/* Nama pasangan SENGAJA tidak dipecah per huruf.
-   Yellowtail itu huruf sambung: kalau tiap hurufnya dijadikan kotak
-   sendiri (inline-block), sambungan antar-hurufnya bisa putus dan
-   posisinya dibulatkan per piksel — jadi terlihat renggang. Gerakannya
-   diganti jadi satu kesatuan yang "mengunci fokus": nama datang sedikit
-   dari bawah, mengecil & kabur, lalu mendarat tajam. Aman untuk font
-   apa pun, dan untuk sebuah nama justru lebih tenang. */
-.closing-names.reveal{
-  transform:translate3d(0,26px,0) scale(.94);
-  transition-duration:1.5s,1.5s,1.1s;
-}
+/* Nama pasangan sengaja TIDAK dipecah per huruf: Yellowtail itu huruf
+   sambung, tiap huruf jadi kotak sendiri akan memutus sambungannya. */
+.closing-names.reveal{transform:translate3d(0,26px,0) scale(.94);
+  transition-duration:1.5s,1.5s,1.1s;}
 body.fx-armed .closing-names.reveal.in-view{transform:none;}
 
-/* ===================================================================
-   3. LABEL & PEMBATAS — detail kecil yang bikin terasa mahal
-   =================================================================== */
-/* Huruf label merapat ke posisinya, seperti tulisan yang baru selesai
-   di-set. Elemennya display:block, jadi lebar yang berubah tidak
-   mendorong apa pun di sekitarnya. */
-.section-label.reveal{
-  letter-spacing:.62em;opacity:0;transform:none;filter:none;
-  transition-property:opacity,letter-spacing;
-  transition-duration:1s,1.25s;
-}
+/* ---------- 3. Label & pembatas ---------- */
+.section-label.reveal{letter-spacing:.62em;opacity:0;transform:none;filter:none;
+  transition-property:opacity,letter-spacing;transition-duration:1s,1.25s;}
 body.fx-armed .section-label.reveal.in-view{letter-spacing:.32em;opacity:1;filter:none;}
 
-/* Pembatas berdaun: daunnya mekar dari nol, lalu dua garis emas tumbuh
-   keluar kiri-kanan MENJAUHI daun. */
 .divider.reveal i{transform:rotate(40deg) scale(0);transition:transform .85s var(--fx-spring) .18s;}
 .divider.reveal::before,.divider.reveal::after{transform:scaleX(0);transition:transform 1s var(--fx-ease) .34s;}
 .divider.reveal::before{transform-origin:right center;}
@@ -1265,271 +1195,205 @@ body.fx-armed .divider.reveal.in-view i{transform:rotate(40deg) scale(1);}
 body.fx-armed .divider.reveal.in-view::before,
 body.fx-armed .divider.reveal.in-view::after{transform:scaleX(1);}
 
-/* Tiga daun hiasan di pembukaan mekar berurutan dari tengah ke tepi. */
-.ornament-row.reveal .leaf-deco{
-  opacity:0;transform:scale(.3) rotate(-25deg);
+.ornament-row.reveal .leaf-deco{opacity:0;transform:scale(.3) rotate(-25deg);
   transition:opacity .7s var(--fx-ease),transform .8s var(--fx-spring);
-  transition-delay:calc(var(--i,0) * .13s);
-}
+  transition-delay:calc(var(--i,0) * .13s);}
 body.fx-armed .ornament-row.reveal.in-view .leaf-deco{opacity:1;transform:none;}
 
-/* ===================================================================
-   4. AYAT — pelita yang berjalan mengikuti bacaan   ★ efek utama
-   -------------------------------------------------------------------
-   Kata-kata ayat berangkat dari redup, lalu menyala satu per satu
-   persis mengikuti seberapa jauh tamu sudah men-scroll melewatinya —
-   seperti pelita yang bergerak menyusuri baris yang sedang dibaca.
-   Kata yang tepat berada di ujung cahaya diberi warna emas sesaat,
-   lalu turun jadi warna teks biasa setelah terlewati.
-
-   Sengaja TANPA blur & TANPA transform: ayat ini puluhan kata, jadi
-   hanya opacity + warna yang dipakai supaya tetap ringan di ponsel.
-   =================================================================== */
-/* Kata yang belum terlewati SENGAJA masih jelas terbaca (bukan nyaris
-   hilang). Pelita ini aksen, bukan tirai: kalau di perangkat tertentu
-   ia gagal berjalan, ayatnya tetap terbaca utuh seperti biasa. */
-.fx-rw{
-  opacity:.34;
-  transition:opacity .5s ease,color .5s ease,text-shadow .7s ease;
-}
+/* ---------- 4. Ayat: pelita berjalan mengikuti bacaan  * efek utama ----------
+   Hanya opacity + warna, tanpa blur/transform: ayat ini puluhan kata.
+   Kata yang belum terlewati tetap jelas terbaca — pelita ini aksen,
+   bukan tirai, jadi ayatnya utuh walau efeknya gagal jalan. */
+.fx-rw{opacity:.34;transition:opacity .5s ease,color .5s ease,text-shadow .7s ease;}
 .fx-rw.is-lit {opacity:1;}
 .fx-rw.is-edge{color:var(--gold);text-shadow:0 0 22px rgba(199,162,78,.5);}
 
-/* ===================================================================
-   5. MEMPELAI — dua sisi berjalan mendekat, bertemu di tengah
-   =================================================================== */
-.couple-and.reveal{
-  transform:scale(.2) rotate(-14deg);filter:none;
-  transition-timing-function:var(--fx-spring);
-  transition-delay:.42s;
-}
+/* ---------- 5. Mempelai ---------- */
+.couple-and.reveal{transform:scale(.2) rotate(-14deg);filter:none;
+  transition-timing-function:var(--fx-spring);transition-delay:.42s;}
 body.fx-armed .couple-and.reveal.in-view{transform:scale(1) rotate(0);filter:none;}
-
-/* Lingkaran garis putus-putus ikut menyala belakangan, bukan langsung
-   ada. Hanya opacity yang disentuh — transform-nya sedang dipakai
-   animasi spin 40 detik milik desain asli. */
+/* hanya opacity: transform-nya sedang dipakai animasi spin milik desain asli */
 .couple-frame .ring{opacity:0;transition:opacity 1s ease .3s;}
 body.fx-armed .reveal.in-view .couple-frame .ring{opacity:1;}
 
-/* ===================================================================
-   6. MENGHITUNG HARI — angka berganti seperti papan jadwal stasiun
-   =================================================================== */
-.countdown.reveal .countdown__box{
-  opacity:0;transform:translate3d(0,30px,0) scale(.9);
+/* ---------- 6. Menghitung hari ---------- */
+.countdown.reveal .countdown__box{opacity:0;transform:translate3d(0,30px,0) scale(.9);
   transition:opacity .8s var(--fx-ease),transform .8s var(--fx-ease);
-  transition-delay:calc(var(--i,0) * .1s);
-}
+  transition-delay:calc(var(--i,0) * .1s);}
 body.fx-armed .countdown.reveal.in-view .countdown__box{opacity:1;transform:none;}
-
 .countdown__num{display:inline-block;transform-origin:50% 60%;}
-/* Kotak angka bernapas sangat pelan — semata supaya bagian gelap ini
-   tidak terasa mati saat tamu berhenti sejenak menatapnya. */
-body.fx-armed .countdown.in-view .countdown__box{
-  animation:fxBreathe 5.5s ease-in-out infinite;
-  animation-delay:calc(var(--i,0) * .55s);
-}
-@keyframes fxBreathe{
-  0%,100%{border-color:rgba(232,213,160,.35);box-shadow:0 0 0 rgba(199,162,78,0);}
-  50%    {border-color:rgba(232,213,160,.62);box-shadow:0 0 26px rgba(199,162,78,.14);}
-}
 
-/* ===================================================================
-   7. PERJALANAN KAMI — sengaja ditahan
-   -------------------------------------------------------------------
-   Section ini sudah punya kapal yang berlayar mengikuti scroll. Kalau
-   ditambahi gerakan besar lagi, jalur kapalnya justru jadi susah
-   diikuti mata. Jadi yang bergerak HANYA kartu ceritanya (mendekat dari
-   sisi luar peta); jangkar dan medali sengaja tidak disentuh sama
-   sekali, supaya perhitungan posisi kapal tetap presisi.
-   =================================================================== */
+/* ---------- 7. Perjalanan Kami: sengaja ditahan ----------
+   Section ini sudah punya kapal yang berlayar mengikuti scroll. Hanya
+   kartu ceritanya yang bergerak; jangkar & medali tidak disentuh sama
+   sekali supaya perhitungan posisi kapal tetap presisi. */
 #journey .journey-item.reveal{opacity:1;transform:none;filter:none;}
-#journey .journey-item .journey-card{
-  opacity:0;
+#journey .journey-item .journey-card{opacity:0;
   transform:translate3d(-52px,26px,0) rotate(-1.4deg) scale(.96);
   transition:opacity .95s var(--fx-ease),transform .95s var(--fx-ease),
-             border-color .5s var(--ease),box-shadow .5s var(--ease);
-}
+             border-color .5s var(--ease),box-shadow .5s var(--ease);}
 #journey .journey-item:nth-child(even) .journey-card{
-  transform:translate3d(52px,26px,0) rotate(1.4deg) scale(.96);
-}
+  transform:translate3d(52px,26px,0) rotate(1.4deg) scale(.96);}
 body.fx-armed #journey .journey-item.in-view .journey-card{opacity:1;transform:rotate(-1.4deg);}
 body.fx-armed #journey .journey-item:nth-child(even).in-view .journey-card{opacity:1;transform:rotate(1.4deg);}
-/* Saat kapal sudah melewati tonggak ini, kartunya diluruskan —
-   perilaku asli undangan, dipertahankan dengan specificity yang cukup. */
 body.fx-armed #journey .journey-item.in-view.is-passed .journey-card,
 body.fx-armed #journey .journey-item:nth-child(even).in-view.is-passed .journey-card{transform:rotate(0deg);}
-
 @media (max-width:680px){
-  /* Di layar sempit kartunya nyaris selebar layar; geseran 52px bikin
-     terasa "terlempar". Dikecilkan jadi geseran vertikal saja. */
   #journey .journey-item .journey-card,
-  #journey .journey-item:nth-child(even) .journey-card{
-    transform:translate3d(0,26px,0) scale(.97);
-  }
+  #journey .journey-item:nth-child(even) .journey-card{transform:translate3d(0,26px,0) scale(.97);}
 }
-
-/* Perbaikan kecil yang ikut kena manfaatnya di sini: kode asli menulis
-   ulang transform kapal tiap frame lewat JS, dan penulisan itu otomatis
-   menghapus translate(-50%,0) milik CSS-nya — akibatnya kapal berlayar
-   sekitar setengah badannya di sebelah KANAN jalur emas (bisa dilihat di
-   file aslinya juga). Digeser balik lewat properti `translate` yang
-   berdiri sendiri: ia disusun DI LUAR transform inline jadi tidak saling
-   menimpa, dan tidak perlu tahu lebar kapalnya — yang memang berbeda
-   antara desktop (62px) dan ponsel (42px).
-   Kalau ternyata pergeseran itu memang disengaja, hapus tiga baris ini. */
+/* Kode asli menulis ulang transform kapal tiap frame lewat JS, yang otomatis
+   menghapus translate(-50%,0) milik CSS-nya — kapal jadi berlayar setengah
+   badannya di kanan jalur emas. Properti `translate` berdiri sendiri dan
+   disusun DI LUAR transform inline, jadi tidak saling menimpa. */
 @supports (translate: -50% 0){
   #journey .journey-ship{translate:-50% 0;}
 }
 
-/* ===================================================================
-   8. ACARA & AMPLOP — kartu direbahkan, lalu ikut condong ke kursor
-   =================================================================== */
+/* ---------- 8. Acara & amplop ---------- */
 @media (hover:hover) and (pointer:fine){
   body.fx-armed .event-card.in-view,
   body.fx-armed .gift-card.in-view{
     transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(var(--lift,0px));
-    transition-duration:var(--fx-dur),.55s,.75s;
-  }
-  /* Selagi kursor benar-benar di atas kartu, kartunya harus mengikuti
-     nyaris seketika — kalau tidak, terasa seperti tertinggal. */
+    transition-duration:var(--fx-dur),.55s,.75s;}
   body.fx-armed .event-card.in-view.fx-tilting,
   body.fx-armed .gift-card.in-view.fx-tilting{transition-duration:var(--fx-dur),.1s,.75s;}
 }
 
-/* ===================================================================
-   9. GALERI — tirai naik, foto mendarat dari perbesaran
-   -------------------------------------------------------------------
-   Bingkainya tersingkap dari bawah ke atas (clip-path) sementara isi di
-   dalamnya mendarat dari zoom — jadi terasa seperti foto yang diam
-   sementara bingkainya dibuka, bukan kotak yang tiba-tiba muncul.
-   Setelah itu isinya terus bergeser pelan mengikuti scroll (parallax),
-   yang memberi galeri ini kedalaman.
-   =================================================================== */
-.gallery__item.reveal{
-  opacity:1;filter:none;transform:none;
+/* ---------- 9. Galeri: tirai naik, foto mendarat dari perbesaran ---------- */
+.gallery__item.reveal{opacity:1;filter:none;transform:none;
   clip-path:inset(0 0 100% 0);
-  transition:clip-path 1.2s var(--fx-ease),transform .45s var(--ease),box-shadow .45s var(--ease);
-}
+  transition:clip-path 1.2s var(--fx-ease),transform .45s var(--ease),box-shadow .45s var(--ease);}
 body.fx-armed .gallery__item.reveal.in-view{opacity:1;filter:none;clip-path:inset(0 0 0 0);}
 .gallery__item > *{transform:scale(1.3);transition:transform 1.5s var(--fx-ease);}
 body.fx-armed .gallery__item.in-view > *{transform:translateY(var(--par,0px)) scale(1);}
 @media (hover:hover) and (pointer:fine){
   body.fx-armed .gallery__item.reveal.in-view:hover{transform:scale(1.03);box-shadow:0 22px 44px rgba(20,26,14,.26);}
 }
-/* Keterangan foto naik dari bawah, tidak sekadar timbul. */
 .gallery__item::after{transform:translateY(14px);transition:opacity .4s var(--fx-ease),transform .5s var(--fx-ease);}
 .gallery__item:hover::after{transform:translateY(0);}
 
-/* ===================================================================
-   10. RSVP — kolom isian datang berurutan
-   =================================================================== */
-.rsvp-form.reveal > *{
-  opacity:0;transform:translate3d(0,22px,0);
+/* ---------- 10. RSVP ---------- */
+.rsvp-form.reveal > *{opacity:0;transform:translate3d(0,22px,0);
   transition:opacity .8s var(--fx-ease),transform .8s var(--fx-ease);
-  transition-delay:calc(var(--i,0) * .11s);
-}
+  transition-delay:calc(var(--i,0) * .11s);}
 body.fx-armed .rsvp-form.reveal.in-view > *{opacity:1;transform:none;}
-
-/* Kilau menyapu tombol kirim sekali saat ia masuk layar — penanda halus
-   bahwa inilah tindakan utama di halaman ini. */
 .submit-btn{position:relative;overflow:hidden;}
-.submit-btn::after{
-  content:'';position:absolute;inset:0;pointer-events:none;
+.submit-btn::after{content:'';position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(105deg,transparent 38%,rgba(232,213,160,.5) 50%,transparent 62%);
-  transform:translateX(-130%);
-}
+  transform:translateX(-130%);}
 body.fx-armed .rsvp-form.in-view .submit-btn::after{animation:fxSheen 1.5s var(--fx-ease) 1s;}
 @keyframes fxSheen{to{transform:translateX(130%);}}
 
-/* ===================================================================
-   11. PENUTUP — nama pasangan seperti sedang ditulis tangan
-   =================================================================== */
-.closing-logo.reveal,
-.closing-leaf.reveal{filter:none;transition-timing-function:var(--fx-spring);transition-duration:1.2s;}
+/* ---------- 11. Penutup ---------- */
+.closing-logo.reveal,.closing-leaf.reveal{filter:none;
+  transition-timing-function:var(--fx-spring);transition-duration:1.2s;}
 .closing-logo.reveal{transform:scale(.62) rotate(-22deg);}
 .closing-leaf.reveal{transform:translateY(18px) rotate(-30deg) scale(.6);}
 body.fx-armed .closing-logo.reveal.in-view,
 body.fx-armed .closing-leaf.reveal.in-view{transform:none;filter:none;}
-
-.closing-date.reveal{
-  letter-spacing:.9em;opacity:0;transform:none;filter:none;
-  transition-property:opacity,letter-spacing;transition-duration:1.35s;
-}
+.closing-date.reveal{letter-spacing:.9em;opacity:0;transform:none;filter:none;
+  transition-property:opacity,letter-spacing;transition-duration:1.35s;}
 body.fx-armed .closing-date.reveal.in-view{letter-spacing:.3em;opacity:1;filter:none;}
 
-/* ===================================================================
-   12. NAVIGASI TITIK — jadi penunjuk progres baca, bukan sekadar titik
-   =================================================================== */
+/* ---------- 12. Navigasi titik jadi penunjuk progres baca ---------- */
 .dot-nav a{position:relative;z-index:1;}
 .dot-nav a.is-active{box-shadow:0 0 0 5px rgba(199,162,78,.18);}
-.fx-rail{
-  position:absolute;left:4px;top:-18px;bottom:-18px;width:1px;z-index:0;
-  background:rgba(51,66,44,.16);
-}
-.fx-rail__fill{
-  position:absolute;left:0;top:0;width:100%;height:var(--p,0%);
-  background:linear-gradient(180deg,var(--gold),var(--clay));
-}
-/* Nama bagian muncul saat titiknya disentuh kursor — navigasi jadi bisa
-   dipakai, bukan cuma hiasan yang harus ditebak. */
-.dot-nav a::after{
-  content:attr(aria-label);position:absolute;right:20px;top:50%;
+.fx-rail{position:absolute;left:4px;top:-18px;bottom:-18px;width:1px;z-index:0;
+  background:rgba(51,66,44,.16);}
+.fx-rail__fill{position:absolute;left:0;top:0;width:100%;height:var(--p,0%);
+  background:linear-gradient(180deg,var(--gold),var(--clay));}
+.dot-nav a::after{content:attr(aria-label);position:absolute;right:20px;top:50%;
   transform:translateY(-50%) translateX(8px);opacity:0;white-space:nowrap;
   font-family:var(--sans);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;
   color:var(--forest);pointer-events:none;
-  transition:opacity .35s var(--fx-ease),transform .35s var(--fx-ease);
-}
+  transition:opacity .35s var(--fx-ease),transform .35s var(--fx-ease);}
 .dot-nav a:hover::after,.dot-nav a:focus-visible::after{opacity:.85;transform:translateY(-50%);}
 
-/* ===================================================================
-   13. PETUNJUK GESER — hilang sendiri begitu tamu mulai men-scroll
-   =================================================================== */
-.fx-scrollcue{
-  position:fixed;left:50%;bottom:26px;z-index:70;
+/* ---------- 13. Petunjuk geser ---------- */
+.fx-scrollcue{position:fixed;left:50%;bottom:26px;z-index:70;
   transform:translateX(-50%) translateY(14px);opacity:0;
   display:flex;flex-direction:column-reverse;align-items:center;gap:.55rem;
   pointer-events:none;color:var(--forest);
-  transition:opacity .8s ease,transform .8s var(--fx-ease);
-}
+  transition:opacity .8s ease,transform .8s var(--fx-ease);}
 body.fx-armed .fx-scrollcue{opacity:.7;transform:translateX(-50%);}
 body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) translateY(14px);}
 .fx-scrollcue span{font-size:.58rem;letter-spacing:.28em;text-transform:uppercase;}
-.fx-scrollcue i{
-  display:block;width:1px;height:34px;position:relative;
-  background:linear-gradient(180deg,transparent,rgba(199,162,78,.7));
-}
-.fx-scrollcue i::after{
-  content:'';position:absolute;left:50%;top:0;width:5px;height:5px;margin-left:-2.5px;
-  border-radius:50%;background:var(--gold);
-  animation:fxCueDrop 2.1s var(--fx-ease) infinite;
-}
-@keyframes fxCueDrop{
-  0%  {transform:translateY(0);opacity:0;}
-  25% {opacity:1;}
-  70% {opacity:1;}
-  100%{transform:translateY(30px);opacity:0;}
-}
+.fx-scrollcue i{display:block;width:1px;height:34px;position:relative;
+  background:linear-gradient(180deg,transparent,rgba(199,162,78,.7));}
+.fx-scrollcue i::after{content:'';position:absolute;left:50%;top:0;width:5px;height:5px;margin-left:-2.5px;
+  border-radius:50%;background:var(--gold);animation:fxCueDrop 2.1s var(--fx-ease) infinite;}
+@keyframes fxCueDrop{0%{transform:translateY(0);opacity:0;}25%{opacity:1;}70%{opacity:1;}
+  100%{transform:translateY(30px);opacity:0;}}
+/* Petunjuk ini hilang permanen setelah tamu men-scroll — begitu hilang,
+   animasi tetesnya ikut dimatikan supaya tidak berdetak selamanya. */
+body.fx-armed .fx-scrollcue.is-gone i::after{animation:none;}
 @media (max-width:600px){.fx-scrollcue{bottom:calc(20px + env(safe-area-inset-bottom));}}
 
-/* ===================================================================
-   14. DEDAUNAN IKUT ARAH SCROLL
-   -------------------------------------------------------------------
-   Saat halaman digulir, seluruh lapisan daun tertinggal sedikit lalu
-   menyusul kembali — persis dedaunan yang telat mengikuti angin.
-   Sangat samar (belasan piksel saja), tapi justru ini yang bikin scroll
-   terasa punya udara, bukan sekadar teks yang bergerak.
-   =================================================================== */
+/* ---------- 14. Dedaunan ikut arah scroll (hanya desktop) ---------- */
 #leaves{transform:translate3d(0,var(--fx-vel,0px),0);}
 
 /* ===================================================================
-   15. HORMATI SETELAN "KURANGI GERAK" DI PERANGKAT TAMU
+   15. MODE HEMAT PONSEL
+   Yang dimatikan di sini bukan hal yang terlihat: rotasi 55-170 detik
+   per putaran secara fisik tidak bisa dipersepsi mata, tapi memaksa
+   browser menggambar ulang elemennya terus-menerus.
    =================================================================== */
-@media (prefers-reduced-motion: reduce){
-  .reveal,.reveal.in-view,
-  .reveal.fx-left,.reveal.fx-right,.reveal.fx-lay,
-  .closing-logo.reveal,.closing-leaf.reveal,.couple-and.reveal{
-    opacity:1 !important;transform:none !important;filter:none !important;
+@media (max-width:820px), (hover:none) and (pointer:coarse){
+  /* rotasi tak kasat mata: 5 medali jangkar + 2 kompas peta + 1 kompas + 2 cincin */
+  .journey-anchor-seal,.journey-compass,.journey-map-compass,
+  .couple-frame .ring{animation:none !important;}
+  /* filter mahal: satu lapisan render per daun, dikali belasan daun */
+  .leaf{filter:none !important;}
+  .journey-ship{filter:none !important;}
+  /* backdrop-filter termasuk efek paling berat di GPU ponsel */
+  .countdown__box{backdrop-filter:none !important;-webkit-backdrop-filter:none !important;}
+  /* tiap kartu ucapan punya animasi melayang sendiri, di atas marquee-nya */
+  .wish-card{animation:none !important;}
+  /* dedaunan tidak ikut arah scroll di ponsel */
+  #leaves{transform:none !important;}
+
+  /* --- Perbaikan repaint, urut dari yang paling mahal saat diukur ---
+
+     Bayangan lebar (blur 30px) harus dihitung ulang tiap kali kartunya
+     ikut bergeser. Radiusnya dipersempit; secara tampilan hampir tak
+     terbedakan di layar kecil, tapi jauh lebih murah digambar. */
+  :root{
+    --shadow:0 8px 18px rgba(20,26,14,.26);
+    --shadow-soft:0 3px 9px rgba(20,26,14,.16);
   }
+
+  /* Latar section "Perjalanan Kami" aslinya empat radial-gradient bertumpuk
+     di atas satu linear-gradient, digambar ulang sepanjang scroll.
+     Disederhanakan jadi satu gradasi saja — nuansa peta usangnya tetap. */
+  #journey{
+    background:linear-gradient(180deg,var(--cream) 0%,#F3E5C6 12%,#F3E5C6 88%,var(--cream) 100%) !important;
+  }
+
+  /* mask-image memaksa lapisan komposit tersendiri untuk grid peta.
+     Efek memudar di tepi diganti opacity biasa. */
+  .journey-map-grid{
+    -webkit-mask-image:none !important;mask-image:none !important;opacity:.45;
+  }
+  /* dua kompas raksasa di latar peta: nyaris tak terlihat (opacity .07-.08)
+     tapi tetap ikut digambar ulang */
+  .journey-map-compass{display:none !important;}
+}
+
+/* Animasi tak berujung dijeda saat bagiannya sedang tidak terlihat. */
+body.fx-pause-journey .journey-cloud,
+body.fx-pause-journey .journey-gull,
+body.fx-pause-journey .journey-anchor-seal,
+body.fx-pause-journey .journey-compass,
+body.fx-pause-journey .journey-map-compass{animation-play-state:paused;}
+body.fx-pause-wishes .wish-track,
+body.fx-pause-wishes .wish-card{animation-play-state:paused;}
+
+/* ---------- 16. Hormati setelan "kurangi gerak" ---------- */
+@media (prefers-reduced-motion: reduce){
+  .reveal,.reveal.in-view,.reveal.fx-left,.reveal.fx-right,.reveal.fx-lay,
+  .closing-logo.reveal,.closing-leaf.reveal,.couple-and.reveal{
+    opacity:1 !important;transform:none !important;filter:none !important;}
   .fx-wi{transform:none !important;filter:none !important;opacity:1 !important;}
   .fx-rw{opacity:1 !important;}
   .section-label.reveal{letter-spacing:.32em !important;}
@@ -1538,7 +1402,7 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
   .divider.reveal i{transform:rotate(40deg) scale(1) !important;}
   .divider.reveal::before,.divider.reveal::after{transform:scaleX(1) !important;}
   .ornament-row.reveal .leaf-deco{opacity:1 !important;transform:none !important;}
-  .countdown.reveal .countdown__box{opacity:1 !important;transform:none !important;animation:none !important;}
+  .countdown.reveal .countdown__box{opacity:1 !important;transform:none !important;}
   .rsvp-form.reveal > *{opacity:1 !important;transform:none !important;}
   #journey .journey-item .journey-card{opacity:1 !important;}
   .gallery__item.reveal{clip-path:none !important;}
@@ -1876,6 +1740,7 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
         </svg>
 
         <div class="journey-ship" id="journeyShip" aria-hidden="true">
+          <div class="journey-ship__bob">
           <svg viewBox="0 0 240 170">
             <path class="ship__wake-line" d="M14,132 Q-16,126 -40,133" stroke-width="2" opacity=".4"/>
             <path class="ship__wake-line" d="M6,143 Q-22,140 -48,147" stroke-width="2" opacity=".22"/>
@@ -1892,6 +1757,7 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
             <line class="ship__lantern-line" x1="205" y1="106" x2="205" y2="113"/>
             <circle class="ship__lantern" cx="205" cy="116" r="4"/>
           </svg>
+          </div>
         </div>
 
         <ol class="journey-list">
@@ -2177,7 +2043,7 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
   /* ---------- Grass blades ---------- */
   const grass = document.getElementById('grass');
   if (grass) {
-    const grassCount = isMobile ? 30 : 46;
+    const grassCount = isMobile ? 18 : 40;
     for (let i=0;i<grassCount;i++){
       const b = document.createElement('span');
       b.className = 'blade';
@@ -2192,7 +2058,7 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
   /* ---------- Fireflies (cover only) ---------- */
   const fireflyLayer = document.getElementById('fireflies');
   if (fireflyLayer) {
-    const fireflyCount = isMobile ? 10 : 16;
+    const fireflyCount = isMobile ? 7 : 14;
     for (let i=0;i<fireflyCount;i++){
       const f = document.createElement('span');
       f.className = 'firefly';
@@ -2207,7 +2073,7 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
   /* ---------- Bridge stars (voyage scene only) ---------- */
   const starLayer = document.getElementById('bridgeStars');
   if (starLayer) {
-    const starCount = isMobile ? 16 : 22;
+    const starCount = isMobile ? 11 : 20;
     for (let i=0;i<starCount;i++){
       const s = document.createElement('span');
       s.className = 'star';
@@ -2224,7 +2090,7 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
   const leafSVG = '<svg viewBox="0 0 32 32"><path d="M16 2C7 9 3 19 16 30C29 19 25 9 16 2Z"/></svg>';
   const petalSVG = '<svg viewBox="0 0 32 32"><path d="M16 4C22 8 27 15 22 23C19 28 13 28 10 23C5 15 10 8 16 4Z"/></svg>';
   if (leafLayer) {
-    const leafCount = isMobile ? 10 : 16;
+    const leafCount = isMobile ? 5 : 14;
     for (let i=0;i<leafCount;i++){
       const l = document.createElement('span');
       const isPetal = i % 3 === 0;
@@ -2247,6 +2113,7 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
   const musicToggle = document.getElementById('musicToggle');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let opened = false;
+  let coverGone = false;
   openBtn && openBtn.addEventListener('click', () => {
     if (opened) return;
     opened = true;
@@ -2282,6 +2149,17 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
       document.body.classList.remove('invite-locked');
       document.body.classList.add('content-visible');
     }, toContent + coverHideMs);
+
+    /* PENTING untuk performa: panggung pembuka dilepas TOTAL dari halaman
+       setelah dipakai. Sebelumnya hanya visibility:hidden — puluhan animasi
+       di dalamnya (rumput, kunang-kunang, burung, kupu-kupu, bintang,
+       ombak, layar kapal, riak, kelip bulan) tetap berdetak selamanya di
+       balik layar. Inilah beban terbesar halaman ini di ponsel, dan ia
+       terasa justru SETELAH tamu jauh melewati bagian pembuka. */
+    setTimeout(() => {
+      cover.style.display = 'none';
+      coverGone = true;
+    }, toContent + coverHideMs + 400);
   });
 
   musicToggle && musicToggle.addEventListener('click', () => {
@@ -2322,10 +2200,17 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
     const vineMarkers = document.querySelectorAll('#growVine [data-threshold]');
 
     let vineTicking = false;
+    let lastVineOffset = null;
     function updateVine(){
       const scrollable = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
       const percent = Math.min(1, Math.max(0, window.scrollY / scrollable));
-      vinePath.style.strokeDashoffset = vineLen * (1 - percent);
+      const vineOffset = vineLen * (1 - percent);
+      /* Ambang: pergeseran di bawah ~1,5px tidak kelihatan, tapi tetap
+         memaksa browser mem-vektor-ulang seluruh jalur sulur. */
+      if (lastVineOffset === null || Math.abs(vineOffset - lastVineOffset) > (isMobile ? 6 : 0.5)){
+        vinePath.style.strokeDashoffset = vineOffset;
+        lastVineOffset = vineOffset;
+      }
       vineMarkers.forEach(m => {
         m.classList.toggle('is-grown', percent >= parseFloat(m.getAttribute('data-threshold')));
       });
@@ -2343,7 +2228,10 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
   const hills = document.querySelectorAll('.hill');
   let hillsTicking = false;
   window.addEventListener('scroll', () => {
-    if (hillsTicking) return;
+    /* Bukit-bukit ini ada DI DALAM cover. Tanpa penjaga ini, transform-nya
+       tetap ditulis ulang setiap kali tamu men-scroll sampai halaman
+       terakhir — untuk elemen yang sudah tidak ada di layar. */
+    if (coverGone || hillsTicking) return;
     hillsTicking = true;
     requestAnimationFrame(() => {
       const y = window.scrollY;
@@ -2373,7 +2261,7 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
 
     let trackWidth = 0, trackHeight = 0, centerX = 0, seaLineLength = 0, trackOffsetTop = 0;
     let itemProgress = [];
-    let restStartTime = null;
+    let lastX = null, lastY = null, lastAngle = null;
     let hasCelebratedArrival = false;
     let displayProgress = 0;
     let hasInitDisplayProgress = false;
@@ -2614,37 +2502,25 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
       const xAhead = waveX(Math.min(1, progress+dStep));
       const angle = Math.atan2(xAhead-x, dStep*trackHeight) * (180/Math.PI) * 0.5;
 
-      /* Ombak yang terus berjalan selagi kapal berlayar — supaya kapal
-         terlihat benar-benar dipermainkan ombak (naik-turun pelan), sama
-         seperti kapal di scene malam (bridge). Pakai waktu absolut
-         (nowMs, dibaca sekali di atas) yang terus berjalan, TERLEPAS dari
-         posisi scroll, jadi ombaknya tetap terasa hidup baik saat scroll
-         cepat, lambat, maupun berhenti sejenak di tengah jalan. */
-      const sailBobAmplitude = reduceMotion ? 0 : 1;
-      const sailBobY = Math.sin(nowMs/1000*2.1)*1.8*sailBobAmplitude;
-      const sailBobRot = Math.sin(nowMs/1000*1.7+0.6)*1*sailBobAmplitude;
-
-      /* Begitu kapal sampai ujung jalur, ombaknya membesar sedikit — ia
-         tidak cuma diam kaku, tapi "mengapung" lebih terasa di tempat,
-         seperti benar-benar berlabuh dan beristirahat, bukan berhenti
-         mendadak karena kehabisan data. */
+      /* Ombak naik-turun kapal SUDAH DIPINDAH ke animasi CSS (.journey-ship__bob).
+         Dulu dihitung di sini pakai jam absolut (nowMs), artinya transform
+         kapal berubah di SETIAP frame selamanya — walau tamu diam tak
+         menyentuh layar. Akibatnya loop ini tidak pernah punya alasan untuk
+         berhenti, dan browser terus menghitung ulang posisi + menggambar
+         ulang garis emas tanpa henti. Itu penyebab utama section ini terasa
+         berat di ponsel. Sekarang ombaknya jalan sendiri di compositor. */
       const atRest = progress >= 0.999 && targetProgress >= 0.999;
-      if (atRest){
-        if (restStartTime === null) restStartTime = nowMs;
-      } else {
-        restStartTime = null;
-      }
-      const restBobT = restStartTime !== null ? (nowMs - restStartTime)/1000 : 0;
-      const restBobAmplitude = reduceMotion ? 0 : 1;
-      const restBobY = atRest ? Math.sin(restBobT*1.6)*3*restBobAmplitude : 0;
-      const restBobRot = atRest ? Math.sin(restBobT*1.2+0.6)*1.3*restBobAmplitude : 0;
-
-      const bobY = atRest ? restBobY : sailBobY;
-      const bobRot = atRest ? restBobRot : sailBobRot;
-
       ship.classList.toggle('is-arrived', atRest);
 
-      ship.style.transform = 'translate('+x.toFixed(1)+'px,'+(y+bobY).toFixed(1)+'px) rotate('+(angle+bobRot).toFixed(1)+'deg)';
+      /* Transform hanya ditulis kalau posisinya memang berpindah. Menulis
+         style yang nilainya sama persis tetap memaksa browser menghitung
+         ulang — jadi ini bukan optimasi kosmetik. */
+      let moved = false;
+      if (lastX === null || Math.abs(x-lastX) > 0.2 || Math.abs(y-lastY) > 0.2 || Math.abs(angle-lastAngle) > 0.2){
+        ship.style.transform = 'translate('+x.toFixed(1)+'px,'+y.toFixed(1)+'px) rotate('+angle.toFixed(1)+'deg)';
+        lastX = x; lastY = y; lastAngle = angle;
+        moved = true;
+      }
 
       /* Garis emas "tergambar" mengikuti sejauh mana kapal sudah berlayar.
          Menggambar ulang stroke-dash SVG itu tidak semurah menggeser
@@ -2654,7 +2530,7 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
          nyaris tidak kelihatan. */
       if (seaLineLength){
         const offset = seaLineLength * (1 - progress);
-        if (lastSeaOffset === null || Math.abs(offset - lastSeaOffset) > 0.3){
+        if (lastSeaOffset === null || Math.abs(offset - lastSeaOffset) > (isMobile ? 12 : 0.4)){
           seaLine.style.strokeDasharray = seaLineLength;
           seaLine.style.strokeDashoffset = offset;
           lastSeaOffset = offset;
@@ -2672,6 +2548,10 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
           }
         }
       });
+
+      /* Laporkan ke loop: masih ada yang bergerak, atau sudah benar-benar
+         diam dan loop boleh dimatikan? */
+      return moved || Math.abs(targetProgress - displayProgress) > 0.0005;
     }
 
     /* Loop rAF berkelanjutan (bukan cuma saat event 'scroll' menembak) —
@@ -2683,15 +2563,25 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
        (bukan cuma di-skip) saat section ini tidak sedang dilihat. */
     let journeyLoopId = null;
     let journeyLoopActive = false;
+    let journeyVisible = false;
+    let idleFrames = 0;
     function journeyLoop(){
-      updateShip();
+      /* Begitu kapal benar-benar diam, loop DIMATIKAN — bukan sekadar
+         dilewati. Selama ini ia terus berputar 60x/detik walau tak ada
+         yang berubah di layar. Ia dibangunkan lagi oleh event scroll. */
+      idleFrames = updateShip() ? 0 : idleFrames + 1;
+      if (idleFrames > 12){ stopJourneyLoop(); return; }
       journeyLoopId = requestAnimationFrame(journeyLoop);
     }
     function startJourneyLoop(){
+      idleFrames = 0;
       if (journeyLoopActive) return;
       journeyLoopActive = true;
       journeyLoop();
     }
+    window.addEventListener('scroll', () => {
+      if (journeyVisible) startJourneyLoop();
+    }, { passive:true });
     function stopJourneyLoop(){
       journeyLoopActive = false;
       if (journeyLoopId !== null){
@@ -2740,12 +2630,18 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
     if ('IntersectionObserver' in window) {
       const journeyVisibility = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-          if (entry.isIntersecting) startJourneyLoop();
+          journeyVisible = entry.isIntersecting;
+          /* Ambang 60% tinggi layar di atas & bawah membuat loop menyala
+             jauh sebelum section terlihat. Dipersempit ke 25%: masih cukup
+             untuk menghindari kapal "muncul tiba-tiba", tapi tidak
+             menghidupkan animasi untuk layar yang belum tentu didatangi. */
+          if (journeyVisible) startJourneyLoop();
           else stopJourneyLoop();
         });
-      }, { rootMargin: '60% 0px 60% 0px' });
+      }, { rootMargin: '25% 0px 25% 0px' });
       journeyVisibility.observe(track);
     } else {
+      journeyVisible = true;
       startJourneyLoop();
     }
   })();
@@ -2899,73 +2795,48 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
 
 <script id="fx-script">
 /* ===================================================================
-   PENGGERAK KOREOGRAFI SCROLL  (pasangan dari blok style#fx-style)
-   -------------------------------------------------------------------
-   Skrip ini hanya MENAMBAH kelas & atribut ke markup yang sudah ada.
-   Tidak ada satu pun elemen asli undangan yang dipindah, dihapus, atau
-   ditulis ulang — jadi kalau blok ini dihapus, halaman kembali persis
-   seperti sebelumnya.
-
-   Semua pekerjaan yang terikat scroll dijalankan dalam SATU loop
-   requestAnimationFrame yang mati sendiri saat tamu berhenti menggulir,
-   supaya tidak menambah beban di atas animasi kapal yang sudah ada.
+   PENGGERAK KOREOGRAFI SCROLL (pasangan blok style#fx-style)
+   Hanya menambah kelas & atribut ke markup yang sudah ada. Semua kerja
+   yang terikat scroll ada dalam SATU loop rAF yang mati sendiri begitu
+   halaman diam, dan di ponsel loop itu mengerjakan jauh lebih sedikit.
    =================================================================== */
 (() => {
   const body   = document.body;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ---------- Kenali kemampuan perangkat ----------
-     Blur itu efek termahal di halaman ini. Di ponsel ukurannya
-     dikecilkan, dan di perangkat berspesifikasi rendah dimatikan sama
-     sekali — gerakannya tetap jalan, cuma tanpa lapisan blur. */
-  const lowPower =
-    (navigator.deviceMemory && navigator.deviceMemory <= 2) ||
-    (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 3);
-  if (innerWidth <= 600) body.classList.add('fx-mobile');
-  if (lowPower)          body.classList.add('fx-lite');
+  /* Mode hemat: ponsel/tablet, atau perangkat berspesifikasi rendah. */
+  const lite = innerWidth <= 820
+            || matchMedia('(hover:none) and (pointer:coarse)').matches
+            || (navigator.deviceMemory && navigator.deviceMemory <= 4)
+            || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+  if (lite) body.classList.add('fx-lite');
 
-  /* ================================================================
-     1. PEMECAH JUDUL
-     Tiap kata dapat jeda sendiri lewat --fx-wd, jadi urutan mendaratnya
-     diatur murni oleh CSS.
-     ================================================================ */
+  /* ---------- 1. Judul dipecah per kata ---------- */
   function split(el, stepMs, startMs){
     if (!el || el.dataset.fxSplit) return;
     el.dataset.fxSplit = '1';
     let i = 0;
-
     Array.from(el.childNodes).forEach(node => {
-      if (node.nodeType !== 3 || !node.nodeValue.trim()) return;   // hanya simpul teks
+      if (node.nodeType !== 3 || !node.nodeValue.trim()) return;
       const frag = document.createDocumentFragment();
-
-      {
-        /* Spasi dipertahankan sebagai simpul teks biasa supaya judul
-           tetap bisa berganti baris secara wajar di layar sempit. */
-        node.nodeValue.split(/(\s+)/).forEach(part => {
-          if (!part) return;
-          if (/^\s+$/.test(part)){ frag.appendChild(document.createTextNode(part)); return; }
-          const win = document.createElement('span');   // jendela
-          win.className = 'fx-w';
-          const inner = document.createElement('span'); // isi yang naik
-          inner.className = 'fx-wi';
-          inner.textContent = part;
-          inner.style.setProperty('--fx-wd', ((startMs + i++ * stepMs) / 1000).toFixed(3) + 's');
-          win.appendChild(inner);
-          frag.appendChild(win);
-        });
-      }
+      /* Spasi dipertahankan sebagai simpul teks biasa supaya judul tetap
+         bisa berganti baris secara wajar di layar sempit. */
+      node.nodeValue.split(/(\s+)/).forEach(part => {
+        if (!part) return;
+        if (/^\s+$/.test(part)){ frag.appendChild(document.createTextNode(part)); return; }
+        const win = document.createElement('span'); win.className = 'fx-w';
+        const inner = document.createElement('span'); inner.className = 'fx-wi';
+        inner.textContent = part;
+        inner.style.setProperty('--fx-wd', ((startMs + i++ * stepMs) / 1000).toFixed(3) + 's');
+        win.appendChild(inner); frag.appendChild(win);
+      });
       node.parentNode.replaceChild(frag, node);
     });
-
     el.classList.add('fx-split');
   }
-
   document.querySelectorAll('#mainContent .section-title').forEach(el => split(el, 55, 100));
 
-  /* ================================================================
-     2. AYAT — pelita berjalan mengikuti bacaan
-     Kata dipecah dulu di sini; yang menyalakannya nanti loop di bawah.
-     ================================================================ */
+  /* ---------- 2. Ayat dipecah per kata (dinyalakan oleh loop di bawah) ---------- */
   const ayat = document.querySelector('#preamble .ayat');
   let ayatWords = [];
   if (ayat && !reduce){
@@ -2976,29 +2847,22 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
       node.nodeValue.split(/(\s+)/).forEach(part => {
         if (!part) return;
         if (/^\s+$/.test(part)){ frag.appendChild(document.createTextNode(part)); return; }
-        const s = document.createElement('span');
-        s.className = 'fx-rw';
-        s.textContent = part;
-        frag.appendChild(s);
+        const s = document.createElement('span'); s.className = 'fx-rw';
+        s.textContent = part; frag.appendChild(s);
       });
       node.parentNode.replaceChild(frag, node);
     });
     ayatWords = Array.from(ayat.querySelectorAll('.fx-rw'));
   }
 
-  /* ================================================================
-     3. PENANDAAN VARIAN — arah datang tiap elemen
-     ================================================================ */
+  /* ---------- 3. Arah datang tiap elemen ---------- */
   const cards = document.querySelectorAll('#couple .couple-card');
-  if (cards[0]) cards[0].classList.add('fx-left');   // mempelai pria dari kiri
-  if (cards[1]) cards[1].classList.add('fx-right');  // mempelai wanita dari kanan
-
+  if (cards[0]) cards[0].classList.add('fx-left');
+  if (cards[1]) cards[1].classList.add('fx-right');
   document.querySelectorAll('.event-grid, .gift-cards').forEach(grid => {
-    grid.classList.add('fx-stage');                                  // ruang 3D untuk anaknya
+    grid.classList.add('fx-stage');
     grid.querySelectorAll('.reveal').forEach(c => c.classList.add('fx-lay'));
   });
-
-  /* Nomor urut untuk jeda berantai di dalam wadah yang dinetralkan. */
   const index = (sel, parentSel) => {
     document.querySelectorAll(parentSel).forEach(p => {
       p.querySelectorAll(sel).forEach((el, n) => el.style.setProperty('--i', n));
@@ -3008,25 +2872,16 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
   index(':scope > *',      '.rsvp-form');
   index('.leaf-deco',      '.ornament-row');
 
-  /* ================================================================
-     4. HITUNG MUNDUR — angka berganti seperti papan jadwal stasiun
-     Perubahan angkanya dipantau (bukan ditulis ulang di sini), jadi
-     penghitung waktu asli undangan tetap jadi satu-satunya sumber
-     kebenaran. Animasi hanya jalan selagi bagian ini terlihat.
-     ================================================================ */
+  /* ---------- 4. Hitung mundur: angka berganti seperti papan jadwal ----------
+     Perubahan angkanya dipantau (bukan ditulis ulang di sini) dan diputar
+     lewat Web Animations API — tanpa memaksa reflow tiap detik. */
   if (!reduce){
-    let countdownVisible = false;
+    let cdVisible = false;
     const cdSection = document.getElementById('countdown');
     if (cdSection && 'IntersectionObserver' in window){
-      new IntersectionObserver(
-        es => es.forEach(e => { countdownVisible = e.isIntersecting; }),
-        { rootMargin: '10% 0px' }
-      ).observe(cdSection);
+      new IntersectionObserver(es => es.forEach(e => { cdVisible = e.isIntersecting; }),
+                               { rootMargin:'10% 0px' }).observe(cdSection);
     }
-    /* Dipakai Web Animations API, bukan pasang-lepas kelas CSS. Alasannya:
-       mengulang animasi CSS mengharuskan pemaksaan reflow (void offsetWidth)
-       setiap detik untuk empat angka sekaligus — mahal di halaman yang sudah
-       menjalankan animasi kapal. Cara ini memutar ulang tanpa reflow. */
     const tick = [
       { transform:'translateY(-62%) rotateX(52deg)', opacity:0 },
       { transform:'translateY(-14%) rotateX(12deg)', opacity:1, offset:.55 },
@@ -3034,15 +2889,13 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
     ];
     document.querySelectorAll('.countdown__num').forEach(num => {
       new MutationObserver(() => {
-        if (!countdownVisible || !num.animate) return;
+        if (!cdVisible || !num.animate) return;
         num.animate(tick, { duration:450, easing:'cubic-bezier(.16,.84,.28,1)' });
       }).observe(num, { childList:true, characterData:true, subtree:true });
     });
   }
 
-  /* ================================================================
-     5. KARTU YANG CONDONG MENGIKUTI KURSOR (hanya perangkat berkursor)
-     ================================================================ */
+  /* ---------- 5. Kartu condong mengikuti kursor (perangkat berkursor saja) ---------- */
   if (!reduce && matchMedia('(hover:hover) and (pointer:fine)').matches){
     document.querySelectorAll('.event-card, .gift-card').forEach(card => {
       card.addEventListener('pointermove', e => {
@@ -3054,16 +2907,14 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
       });
       card.addEventListener('pointerleave', () => {
         card.classList.remove('fx-tilting');
-        card.style.setProperty('--ry', '0deg');
-        card.style.setProperty('--rx', '0deg');
-        card.style.setProperty('--lift', '0px');
+        card.style.setProperty('--ry','0deg');
+        card.style.setProperty('--rx','0deg');
+        card.style.setProperty('--lift','0px');
       });
     });
   }
 
-  /* ================================================================
-     6. PERABOT TAMBAHAN — rel progres di navigasi titik & petunjuk geser
-     ================================================================ */
+  /* ---------- 6. Rel progres di navigasi titik & petunjuk geser ---------- */
   const dotNav = document.querySelector('.dot-nav');
   let railFill = null;
   if (dotNav){
@@ -3071,21 +2922,16 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
       '<span class="fx-rail" aria-hidden="true"><span class="fx-rail__fill"></span></span>');
     railFill = dotNav.querySelector('.fx-rail__fill');
   }
-
   let cue = null;
   if (!reduce){
     cue = document.createElement('div');
     cue.className = 'fx-scrollcue';
-    cue.setAttribute('aria-hidden', 'true');
+    cue.setAttribute('aria-hidden','true');
     cue.innerHTML = '<span>Geser ke bawah</span><i></i>';
     body.appendChild(cue);
   }
 
-  /* ================================================================
-     7. PEMBERSIHAN — lepas filter blur begitu transisinya tuntas
-     blur(0) pun masih memaksa browser menyiapkan lapisan render
-     tersendiri untuk elemen itu selamanya. Dilepas = halaman ringan lagi.
-     ================================================================ */
+  /* ---------- 7. Lepas filter blur begitu transisinya tuntas ---------- */
   document.querySelectorAll('.reveal').forEach(el => {
     el.addEventListener('transitionend', e => {
       if (e.target === el && e.propertyName === 'filter' && el.classList.contains('in-view')){
@@ -3094,16 +2940,25 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
     });
   });
 
-  /* ================================================================
-     8. LOOP SCROLL TUNGGAL
-     Semua yang terikat posisi scroll dikerjakan di sini, sekali per
-     frame: dorongan dedaunan, parallax galeri, pelita ayat, dan rel
-     progres. Posisi elemen diukur sekali di measure() lalu dipakai
-     dengan window.scrollY — bukan getBoundingClientRect() tiap frame,
-     yang memaksa browser menghitung ulang layout 60x per detik.
-     ================================================================ */
+  /* ---------- 8. Jeda animasi tak berujung saat bagiannya tak terlihat ----------
+     Marquee ucapan, awan & camar di peta, medali & kompas yang berputar:
+     semuanya dulu berdetak selamanya walau tamu ada di ujung halaman lain. */
+  if ('IntersectionObserver' in window){
+    const pause = (sel, cls) => {
+      const el = document.querySelector(sel);
+      if (!el) return;
+      body.classList.add(cls);
+      new IntersectionObserver(es => es.forEach(e => {
+        body.classList.toggle(cls, !e.isIntersecting);
+      }), { rootMargin:'20% 0px' }).observe(el);
+    };
+    pause('#journey', 'fx-pause-journey');
+    pause('#rsvp',    'fx-pause-wishes');
+  }
+
+  /* ---------- 9. Satu loop scroll, mati sendiri saat halaman diam ---------- */
   const leaves    = document.getElementById('leaves');
-  const galleries = Array.from(document.querySelectorAll('.gallery__item'));
+  const galleries = lite ? [] : Array.from(document.querySelectorAll('.gallery__item'));
   let gCache = [], ayatBox = null;
 
   function measure(){
@@ -3122,51 +2977,48 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
 
   function frame(){
     const sy = scrollY, vh = innerHeight;
-
-    /* --- dedaunan tertinggal sesaat lalu menyusul, seperti kena angin --- */
     const dy = sy - lastY;
     lastY = sy;
-    if (leaves){
+
+    /* Dedaunan tertinggal sesaat lalu menyusul, seperti kena angin.
+       Di ponsel dilewati: satu lapisan render lagi untuk efek yang nyaris
+       tidak terlihat di layar kecil. */
+    if (leaves && !lite){
       const target = Math.max(-24, Math.min(24, -dy * 0.55));
       drift += (target - drift) * 0.12;
       leaves.style.setProperty('--fx-vel', drift.toFixed(2) + 'px');
     }
 
-    /* --- isi galeri bergeser lebih pelan dari bingkainya (kedalaman) --- */
+    /* Parallax isi galeri: juga hanya desktop. */
     for (let i = 0; i < gCache.length; i++){
       const c = gCache[i];
       c.el.style.setProperty('--par', (((c.mid - sy - vh / 2) / vh) * -16).toFixed(1) + 'px');
     }
 
-    /* --- pelita berjalan menyusuri ayat --- */
+    /* Pelita berjalan menyusuri ayat. Ayat ini dekat puncak halaman jadi
+       ruang scroll-nya pendek: titik nol dipatok saat bagian atasnya di
+       30% tinggi layar, penuh saat ayat habis melewati tepi atas. */
     if (ayatBox && ayatWords.length){
-      /* Ayat ini letaknya dekat puncak halaman, jadi ruang scroll yang
-         tersedia untuk menyapunya pendek. Titik nolnya dipatok saat
-         bagian atas ayat berada di 30% tinggi layar (posisi baca yang
-         nyaman), dan penuh saat ayat habis melewati tepi atas layar. */
       const top   = ayatBox.top - sy;
       const start = vh * 0.30;
       const p     = (start - top) / Math.max(1, start + ayatBox.h);
       const edge  = p * ayatWords.length;
       for (let i = 0; i < ayatWords.length; i++){
-        const w    = ayatWords[i];
-        const lit  = i < edge;
-        const tip  = lit && (edge - i) < 2.4;
-        if (w._lit  !== lit){ w.classList.toggle('is-lit',  lit);  w._lit  = lit; }
-        if (w._tip  !== tip){ w.classList.toggle('is-edge', tip);  w._tip  = tip; }
+        const w = ayatWords[i];
+        const lit = i < edge;
+        const tip = lit && (edge - i) < 2.4;
+        if (w._lit !== lit){ w.classList.toggle('is-lit',  lit); w._lit = lit; }
+        if (w._tip !== tip){ w.classList.toggle('is-edge', tip); w._tip = tip; }
       }
     }
 
-    /* --- rel progres di navigasi titik --- */
     if (railFill){
       const max = Math.max(document.documentElement.scrollHeight - vh, 1);
       railFill.style.setProperty('--p', (Math.min(1, sy / max) * 100).toFixed(1) + '%');
     }
 
-    /* Loop berhenti sendiri setelah halaman benar-benar diam — tidak
-       ada gunanya membakar baterai untuk sesuatu yang tak bergerak. */
     idleFrames = (Math.abs(dy) < 0.5 && Math.abs(drift) < 0.15) ? idleFrames + 1 : 0;
-    if (idleFrames > 30){ running = false; return; }
+    if (idleFrames > 20){ running = false; return; }
     requestAnimationFrame(frame);
   }
 
@@ -3180,35 +3032,29 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
     wake();
     if (cue && scrollY > 60) cue.classList.add('is-gone');
   }, { passive:true });
-
   addEventListener('resize', () => { measure(); wake(); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { measure(); wake(); }).catch(()=>{});
 
-  /* ================================================================
-     9. PELEPASAN — semua animasi baru dilepas saat undangan dibuka
-     Selagi cover masih menutup layar, isi halaman sudah "terlihat" oleh
-     IntersectionObserver di baliknya. Tanpa penahan ini, seluruh
-     animasi bagian pertama sudah habis dimainkan sebelum tamu sempat
-     melihatnya. Dilepas serentak di sini, jadi sekaligus jadi momen
-     pembuka yang terorkestrasi.
-     ================================================================ */
+  /* ---------- 10. Dilepas saat undangan resmi dibuka ---------- */
   function arm(){
     if (body.classList.contains('fx-armed')) return;
     body.classList.add('fx-armed');
     measure();
     wake();
 
+    /* Jaring pengaman: panggung pembuka dilepas dari halaman juga dari sini,
+       tidak hanya dari rantai setTimeout milik kode asli. Selama masih ada
+       di DOM, puluhan animasi di dalamnya terus berdetak walau tak terlihat. */
+    const coverEl = document.getElementById('cover');
+    if (coverEl) setTimeout(() => { coverEl.style.display = 'none'; }, 900);
     /* Kartu kisah baru menempati posisi akhirnya beberapa saat setelah
-       animasi masuk selesai. Kapal di section "Perjalanan Kami"
-       menghitung jalurnya dari posisi elemen, jadi di sini ia diminta
-       mengukur ulang setelah semuanya benar-benar diam — supaya kapal
-       tetap presisi lewat di atas tiap medali jangkar. */
+       animasi masuk selesai; kapal menghitung jalurnya dari posisi elemen,
+       jadi diminta mengukur ulang setelah semuanya benar-benar diam. */
     [1400, 3200].forEach(t => setTimeout(() => {
       measure();
       dispatchEvent(new Event('resize'));
     }, t));
   }
-
   if (body.classList.contains('content-visible')) arm();
   else {
     const watch = new MutationObserver(() => {
@@ -3216,7 +3062,6 @@ body.fx-armed .fx-scrollcue.is-gone{opacity:0;transform:translateX(-50%) transla
     });
     watch.observe(body, { attributes:true, attributeFilter:['class'] });
   }
-
   measure();
 })();
 </script>
