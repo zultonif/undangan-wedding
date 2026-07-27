@@ -1208,6 +1208,56 @@ body.fx-armed .ornament-row.reveal.in-view .leaf-deco{opacity:1;transform:none;}
 .fx-rw.is-lit {opacity:1;}
 .fx-rw.is-edge{color:var(--gold);text-shadow:0 0 22px rgba(199,162,78,.5);}
 
+/* ---------- 4b. Ruang napas untuk ayat + gerbang lengkung ----------
+   Sebelumnya ayat berada tinggi di halaman, jadi lintasan scroll-nya
+   pendek: pelita baru selesai menyala tepat saat ayatnya sudah habis
+   lewat ke atas layar — tak sempat dinikmati dalam keadaan terang.
+   Blok pembuka ini diberi tinggi hampir selayar penuh sehingga ayat
+   turun ke bawah lipatan; lintasannya jadi panjang dan pelita tuntas
+   selagi ayat masih terbaca utuh di tengah layar. */
+.preamble-open{
+  min-height:88vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:2rem 0 1rem;
+}
+.preamble .bismillah{margin-bottom:1.6rem;}
+.preamble .salam{margin-bottom:0;}
+
+.ayat-arch{
+  width:min(220px,52vw);margin:clamp(2.2rem,6vh,4rem) auto 0;color:var(--gold);
+}
+.ayat-arch svg{width:100%;height:auto;display:block;overflow:visible;}
+/* Garis luar menggambar dirinya sendiri saat masuk layar — sekali jalan,
+   bukan animasi berulang, jadi tidak menambah beban halaman. */
+.ayat-arch__line{
+  stroke:currentColor;stroke-width:1.1;stroke-linecap:round;opacity:.62;
+  stroke-dasharray:var(--len,520);stroke-dashoffset:var(--len,520);
+  transition:stroke-dashoffset 2.6s var(--fx-ease) .25s;
+}
+body.fx-armed .ayat-arch.in-view .ayat-arch__line{stroke-dashoffset:0;}
+.ayat-arch__inner{
+  stroke:currentColor;stroke-width:.8;stroke-linecap:round;
+  stroke-dasharray:2.5 6;opacity:0;
+  transition:opacity 1.4s ease 1.5s;
+}
+body.fx-armed .ayat-arch.in-view .ayat-arch__inner{opacity:.38;}
+.ayat-arch__finial path,.ayat-arch__base path{fill:currentColor;}
+.ayat-arch__finial{opacity:0;transform:translateY(6px) scale(.4);transform-origin:110px 10px;
+  transition:opacity .9s ease 1.9s,transform .9s var(--fx-spring) 1.9s;}
+.ayat-arch__base{opacity:0;transition:opacity 1s ease 1.6s;}
+body.fx-armed .ayat-arch.in-view .ayat-arch__finial{opacity:.9;transform:none;}
+body.fx-armed .ayat-arch.in-view .ayat-arch__base{opacity:.55;}
+
+/* Ayat sendiri diberi napas atas-bawah supaya tidak menempel ke gerbang
+   maupun ke logo di bawahnya. */
+.preamble .ayat{margin-top:clamp(3rem,9vh,6rem);}
+.preamble .ayat-source{margin-top:1.6rem;}
+
+@media (max-width:600px){
+  .preamble-open{min-height:86vh;padding-top:1rem;}
+  .ayat-arch{width:min(170px,46vw);}
+}
+
 /* ---------- 5. Mempelai ---------- */
 .couple-and.reveal{transform:scale(.2) rotate(-14deg);filter:none;
   transition-timing-function:var(--fx-spring);transition-delay:.42s;}
@@ -1409,6 +1459,10 @@ body.fx-pause-wishes .wish-card{animation-play-state:paused;}
   .gallery__item > *{transform:none !important;}
   .fx-scrollcue{display:none !important;}
   #leaves{transform:none !important;}
+  .ayat-arch__line{stroke-dashoffset:0 !important;}
+  .ayat-arch__inner{opacity:.38 !important;}
+  .ayat-arch__finial{opacity:.9 !important;transform:none !important;}
+  .ayat-arch__base{opacity:.55 !important;}
 }
 </style>
 </head>
@@ -1632,8 +1686,27 @@ body.fx-pause-wishes .wish-card{animation-play-state:paused;}
   <!-- PREAMBLE (pembuka Islami) -->
   <section id="preamble" class="section preamble">
     <div class="section-inner">
-      <p class="bismillah reveal">Bismillahirrahmanirrahim</p>
-      <p class="salam reveal reveal-d1">Assalamu'alaikum Warahmatullahi Wabarakatuh</p>
+      <div class="preamble-open">
+        <p class="bismillah reveal">Bismillahirrahmanirrahim</p>
+        <p class="salam reveal reveal-d1">Assalamu'alaikum Warahmatullahi Wabarakatuh</p>
+
+        <!-- Gerbang lengkung: mengantar mata turun ke ayat, sekaligus
+             memberi ruang scroll supaya pelita ayat sempat selesai
+             menyala selagi ayatnya masih terbaca utuh di layar. -->
+        <div class="ayat-arch reveal reveal-d2" aria-hidden="true">
+          <svg viewBox="0 0 220 190" fill="none">
+            <path class="ayat-arch__line" d="M42,186 L42,100 C42,54 68,22 110,8 C152,22 178,54 178,100 L178,186"/>
+            <path class="ayat-arch__inner" d="M56,186 L56,102 C56,62 78,36 110,24 C142,36 164,62 164,102 L164,186"/>
+            <g class="ayat-arch__finial">
+              <path d="M110 0C104 6 102 13 110 20C118 13 116 6 110 0Z"/>
+            </g>
+            <g class="ayat-arch__base">
+              <path d="M42 186C36 180 34 173 42 166C50 173 48 180 42 186Z"/>
+              <path d="M178 186C172 180 170 173 178 166C186 173 184 180 178 186Z"/>
+            </g>
+          </svg>
+        </div>
+      </div>
 
       <p class="ayat reveal reveal-d2">
         "Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu istri-istri dari jenismu sendiri,
@@ -2836,6 +2909,12 @@ body.fx-pause-wishes .wish-card{animation-play-state:paused;}
   }
   document.querySelectorAll('#mainContent .section-title').forEach(el => split(el, 55, 100));
 
+  /* Panjang jalur gerbang lengkung diukur sekali, dipakai CSS untuk efek
+     "menggambar sendiri" agar kecepatannya pas berapa pun ukurannya. */
+  document.querySelectorAll('.ayat-arch__line').forEach(path => {
+    if (path.getTotalLength) path.style.setProperty('--len', Math.ceil(path.getTotalLength()));
+  });
+
   /* ---------- 2. Ayat dipecah per kata (dinyalakan oleh loop di bawah) ---------- */
   const ayat = document.querySelector('#preamble .ayat');
   let ayatWords = [];
@@ -2999,10 +3078,15 @@ body.fx-pause-wishes .wish-card{animation-play-state:paused;}
        ruang scroll-nya pendek: titik nol dipatok saat bagian atasnya di
        30% tinggi layar, penuh saat ayat habis melewati tepi atas. */
     if (ayatBox && ayatWords.length){
-      const top   = ayatBox.top - sy;
-      const start = vh * 0.30;
-      const p     = (start - top) / Math.max(1, start + ayatBox.h);
-      const edge  = p * ayatWords.length;
+      /* Pelita mulai menyala saat ayat baru muncul dari bawah layar, dan
+         HABIS menyala saat bagian bawahnya masih di 62% tinggi layar —
+         jadi seluruh ayat tersaji terang di tengah layar, tidak lagi
+         terlanjur lewat ke atas seperti rumus sebelumnya. */
+      const top    = ayatBox.top - sy;
+      const startT = vh * 0.95;
+      const endB   = vh * 0.62;
+      const p      = (startT - top) / Math.max(1, startT + ayatBox.h - endB);
+      const edge   = p * ayatWords.length;
       for (let i = 0; i < ayatWords.length; i++){
         const w = ayatWords[i];
         const lit = i < edge;
