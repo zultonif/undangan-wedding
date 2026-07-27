@@ -2093,9 +2093,9 @@ body.fx-pause-wishes .wish-card{animation-play-state:paused;}
   const hEl = document.getElementById('cd-hours');
   const mEl = document.getElementById('cd-min');
   const sEl = document.getElementById('cd-sec');
-  function tickBox(el, nextText){
-    if (el) el.textContent = nextText;
-  }
+function tickBox(el, nextText){
+  if (el && el.textContent !== nextText) el.textContent = nextText;
+}
   function updateCountdown(){
     const diff = Math.max(0, weddingDate - Date.now());
     const days = Math.floor(diff/86400000);
