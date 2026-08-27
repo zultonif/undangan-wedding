@@ -2277,20 +2277,7 @@ function tickBox(el, nextText){
       });
     }, { threshold: 0.1 });
     galleryIO.observe(galleryEl);
-  }
-const galleryEl = document.querySelector('.gallery');
-if (galleryEl) {
-  const galleryIO = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        document.querySelectorAll('.gallery__item').forEach(item => item.classList.add('in-view'));
-        galleryIO.unobserve(galleryEl);
-      }
-    });
-  }, { threshold: 0.1 });
-  galleryIO.observe(galleryEl);
-}
-  
+  }  
   /* ---------- Dot nav active state ---------- */
   const dots = document.querySelectorAll('.dot-nav a');
   const navIO = new IntersectionObserver((entries)=>{
